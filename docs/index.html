@@ -25,6 +25,7 @@
 <meta name="twitter:description" content="Classificação animada dia a dia do bolão da Copa do Mundo 2026.">
 <meta name="twitter:image"       content="og-image.jpg">
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
@@ -103,6 +104,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
 }
 
 .title {
@@ -233,10 +235,19 @@ body {
   color: var(--muted);
 }
 
+#header-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 #date-block {
-  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   line-height: 1;
   flex-shrink: 0;
+  gap: 1px;
 }
 
 #date-day {
@@ -245,18 +256,17 @@ body {
   font-size: 28px;
   color: var(--gold);
   letter-spacing: -1px;
-  display: inline;
+  display: block;
 }
 
 #date-month {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--light);
   letter-spacing: 2px;
   text-transform: uppercase;
   display: inline;
-  margin-left: 3px;
 }
 
 #date-year {
@@ -541,17 +551,18 @@ body {
     <div id="header-top">
       <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
       <div id="header-actions">
-        <button id="btn-restart-top" aria-label="Recomeçar">⏮</button>
-        <button id="btn-play-top" aria-label="Play/Pause">▶</button>
-        <button id="btn-last-top" aria-label="Último dia">⏭</button>
-      </div>
-      <div id="date-block">
-        <span id="date-day">11</span>
-        <span id="date-month">JUN</span>
-        <span id="date-year">2026</span>
+        <button id="btn-restart-top" aria-label="Recomeçar"><i class="fa-solid fa-backward-step"></i></button>
+        <button id="btn-play-top" aria-label="Play/Pause"><i class="fa-solid fa-play"></i></button>
+        <button id="btn-last-top" aria-label="Último dia"><i class="fa-solid fa-forward-step"></i></button>
       </div>
     </div>
-    <div class="sub">Classificação dia a dia</div>
+    <div id="header-sub-row">
+      <div class="sub">Classificação dia a dia</div>
+      <div id="date-block">
+        <span id="date-day">11</span>
+        <span id="date-sub"><span id="date-month">JUN</span> <span id="date-year">2026</span></span>
+      </div>
+    </div>
   </div>
   <div id="chart"></div>
   <div id="footer">
@@ -560,9 +571,9 @@ body {
 </div>
 
 <div id="controls">
-  <button id="btn-prev">◀</button>
-  <button id="btn-play">▶ Play</button>
-  <button id="btn-next">▶</button>
+  <button id="btn-prev"><i class="fa-solid fa-backward-step"></i></button>
+  <button id="btn-play"><i class="fa-solid fa-play"></i> Play</button>
+  <button id="btn-next"><i class="fa-solid fa-forward-step"></i></button>
   <span class="ctrl-label" id="day-indicator">1/18</span>
 
   <div class="ctrl-sep"></div>
@@ -824,8 +835,9 @@ function render(dayIdx, animate) {
 
 // ── Playback ──
 function syncPlayButtons(isPlaying) {
-  document.getElementById('btn-play').textContent     = isPlaying ? '⏸ Pausar' : '▶ Play';
-  document.getElementById('btn-play-top').textContent = isPlaying ? '⏸' : '▶';
+  const icon = isPlaying ? 'fa-pause' : 'fa-play';
+  document.getElementById('btn-play').innerHTML     = `<i class="fa-solid ${icon}"></i> ${isPlaying ? 'Pausar' : 'Play'}`;
+  document.getElementById('btn-play-top').innerHTML = `<i class="fa-solid ${icon}"></i>`;
 }
 
 function pause() {
