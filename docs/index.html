@@ -20,27 +20,24 @@
 }
 
 body {
-  background: #040810;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
-  gap: 16px;
-  padding: 16px;
 }
 
-/* ── Frame 9:16 ── */
+/* ── Frame ── */
 #frame {
-  width: 1080px;
-  height: 1920px;
+  flex-shrink: 0;
+  width: 60vw;
+  min-width: 480px;
   background: var(--bg);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
 }
 
 #frame::before {
@@ -59,17 +56,17 @@ body {
 #header {
   position: relative;
   z-index: 1;
-  padding: 44px 60px 20px;
+  padding: 14px 32px 8px;
   display: flex;
-  align-items: baseline;
-  gap: 18px;
+  align-items: center;
+  gap: 14px;
   flex-shrink: 0;
 }
 
 .title {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
-  font-size: 54px;
+  font-size: 32px;
   color: var(--light);
   line-height: 1;
   letter-spacing: -0.5px;
@@ -79,7 +76,7 @@ body {
 .sub {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
-  font-size: 18px;
+  font-size: 13px;
   color: var(--muted);
   letter-spacing: .5px;
   text-transform: uppercase;
@@ -89,7 +86,7 @@ body {
 #chart {
   position: relative;
   z-index: 1;
-  flex: 1;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
@@ -179,9 +176,9 @@ body {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  padding: 12px 60px 44px;
+  padding: 6px 32px 10px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -191,47 +188,55 @@ body {
   color: var(--muted);
 }
 
-#date-block { text-align: right; line-height: 1; }
+#date-block {
+  text-align: right;
+  line-height: 1;
+  margin-left: auto;
+  flex-shrink: 0;
+}
 
 #date-day {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
+  font-size: 28px;
   color: var(--gold);
-  letter-spacing: -2px;
-  display: block;
+  letter-spacing: -1px;
+  display: inline;
 }
 
 #date-month {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
+  font-size: 16px;
   color: var(--light);
   letter-spacing: 2px;
   text-transform: uppercase;
-  display: block;
+  display: inline;
+  margin-left: 3px;
 }
 
 #date-year {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
+  font-size: 13px;
   color: var(--muted);
   letter-spacing: 1px;
-  display: block;
-  margin-top: 2px;
+  display: inline;
+  margin-left: 3px;
 }
 
 /* ── Controls ── */
 #controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  background: rgba(8,13,27,.9);
-  border: 1px solid #1e2d4a;
-  border-radius: 40px;
-  padding: 10px 22px;
-  max-width: 1080px;
-  width: 100%;
+  background: rgba(8,13,27,.97);
+  border-top: 1px solid #1e2d4a;
+  padding: 8px 20px;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 #controls button, #controls select {
@@ -307,15 +312,15 @@ body {
   <div id="header">
     <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
     <div class="sub">Classificação dia a dia</div>
-  </div>
-  <div id="chart"></div>
-  <div id="footer">
-    <div class="source">Fonte: WebBolão</div>
     <div id="date-block">
       <span id="date-day">11</span>
       <span id="date-month">JUN</span>
       <span id="date-year">2026</span>
     </div>
+  </div>
+  <div id="chart"></div>
+  <div id="footer">
+    <div class="source">Fonte: WebBolão</div>
   </div>
 </div>
 
@@ -330,8 +335,8 @@ body {
   <label class="ctrl-label" for="sel-topn">Top</label>
   <select id="sel-topn">
     <option value="5">5</option>
-    <option value="10" selected>10</option>
-    <option value="15">15</option>
+    <option value="10">10</option>
+    <option value="15" selected>15</option>
     <option value="20">20</option>
     <option value="27">Todos</option>
   </select>
@@ -386,7 +391,7 @@ function parseDate(iso) {
 // ── State ──
 let data = null;
 let currentDay = 0;
-let topN = 10;
+let topN = 15;
 let playing = false;
 let playTimer = null;
 const SPEEDS = [1, 1.5, 2, 3];
@@ -396,11 +401,11 @@ const chart = document.getElementById('chart');
 const rows = {};  // userId → DOM row
 
 // ── Sizing (fixo, proporcional ao avatar) ──
-const AVATAR_D  = 44;   // diâmetro do avatar
-const ROW_H     = AVATAR_D + 14;  // altura da linha = avatar + padding
-const BAR_H     = AVATAR_D;       // barra do mesmo tamanho do avatar
-const FONT_SIZE = 14;
-const PAD_TOP   = 16;  // espaço antes da primeira linha
+const AVATAR_D  = 28;   // diâmetro do avatar
+const ROW_H     = AVATAR_D + 10;  // 38px
+const BAR_H     = AVATAR_D;       // barra = altura do avatar
+const FONT_SIZE = 12;
+const PAD_TOP   = 8;   // espaço antes da primeira linha
 
 // ── Render ──
 function render(dayIdx, animate) {
@@ -410,6 +415,9 @@ function render(dayIdx, animate) {
 
   // Update CSS transition speed
   document.documentElement.style.setProperty('--trans', animate ? '800ms' : '0ms');
+
+  // Chart height = exact content
+  chart.style.height = (PAD_TOP + entries.length * ROW_H + 8) + 'px';
 
   // Create missing rows
   for (const e of entries) {
@@ -501,9 +509,6 @@ function render(dayIdx, animate) {
   document.getElementById('date-month').textContent = m;
   document.getElementById('date-year').textContent = y;
   // Scale date font to frame size
-  document.getElementById('date-day').style.fontSize = '90px';
-  document.getElementById('date-month').style.fontSize = '32px';
-  document.getElementById('date-year').style.fontSize = '22px';
 
   document.getElementById('day-indicator').textContent =
     `${dayIdx + 1}/${data.days.length}`;
@@ -621,7 +626,7 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
   for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x,.5); ctx.lineTo(x,H); ctx.stroke(); }
   for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(W,y); ctx.stroke(); }
 
-  // Header
+  // Header — título (esquerda)
   ctx.fillStyle = '#EAEEF8';
   ctx.font = 'bold 38px "Barlow Condensed", sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
@@ -632,6 +637,23 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
   ctx.fillStyle = '#5A6A8A';
   ctx.font = '500 13px Inter, sans-serif';
   ctx.fillText('CLASSIFICAÇÃO DIA A DIA', LEFT_PAD, HEADER_H - 14);
+
+  // Header — data (direita)
+  const { day: d, month: m, year: y } = parseDate(day.date);
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#F5C518';
+  ctx.font = 'bold 32px "Barlow Condensed", sans-serif';
+  const dStr = d + ' ';
+  const dW = ctx.measureText(dStr).width;
+  ctx.fillText(dStr, W - RIGHT_PAD, HEADER_H/2);
+  ctx.fillStyle = '#EAEEF8';
+  ctx.font = 'bold 18px "Barlow Condensed", sans-serif';
+  const mStr = m + ' ';
+  const mW = ctx.measureText(mStr).width;
+  ctx.fillText(mStr, W - RIGHT_PAD - dW, HEADER_H/2);
+  ctx.fillStyle = '#5A6A8A';
+  ctx.font = 'bold 14px "Barlow Condensed", sans-serif';
+  ctx.fillText(y, W - RIGHT_PAD - dW - mW, HEADER_H/2);
 
   // Bars
   entries.forEach((e, i) => {
@@ -700,22 +722,7 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
     ctx.fillText(pts, BAR_LEFT + BAR_W + 8, targetY);
   });
 
-  // Date (bottom right)
-  const { day: d, month: m, year: y } = parseDate(day.date);
-  ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-  ctx.fillStyle = '#F5C518';
-  ctx.font = 'bold 72px "Barlow Condensed", sans-serif';
-  ctx.fillText(d, W - RIGHT_PAD, H - FOOTER_H/2 + 14);
-  const dw = ctx.measureText(d).width;
-  ctx.fillStyle = '#EAEEF8';
-  ctx.font = 'bold 24px "Barlow Condensed", sans-serif';
-  ctx.fillText(m, W - RIGHT_PAD, H - FOOTER_H/2 - 24);
-  ctx.fillStyle = '#5A6A8A';
-  ctx.font = 'bold 16px "Barlow Condensed", sans-serif';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText(y, W - RIGHT_PAD, H - 12);
-
-  // Source
+  // Source (rodapé)
   ctx.fillStyle = '#5A6A8A';
   ctx.font = '13px Inter, sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
