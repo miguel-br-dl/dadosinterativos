@@ -539,6 +539,10 @@ body {
 
   <div class="ctrl-sep"></div>
 
+  <button id="btn-mute">🔊</button>
+
+  <div class="ctrl-sep"></div>
+
   <button id="btn-snapshot">📷 Foto</button>
   <button id="btn-record">⏺ Gravar MP4</button>
 
@@ -547,6 +551,21 @@ body {
   </div>
 </div>
 </div><!-- #app -->
+
+<!-- Áudio de fundo em loop — coloque o arquivo em docs/music.mp3 -->
+<audio id="bg-music" src="audio.mp3" loop preload="auto"></audio>
+<script>
+const bgMusic = document.getElementById('bg-music');
+let ytMuted = false;
+
+function ytPlay()  { if (!ytMuted) bgMusic.play().catch(() => {}); }
+function ytPause() { bgMusic.pause(); }
+function ytToggleMute() {
+  ytMuted = !ytMuted;
+  document.getElementById('btn-mute').textContent = ytMuted ? '🔇' : '🔊';
+  if (ytMuted) { bgMusic.pause(); } else if (playing) { bgMusic.play().catch(() => {}); }
+}
+</script>
 
 <script>
 // ── Paleta ──
@@ -738,11 +757,13 @@ function pause() {
   playing = false;
   clearTimeout(playTimer);
   document.getElementById('btn-play').textContent = '▶ Play';
+  ytPause();
 }
 
 function play() {
   playing = true;
   document.getElementById('btn-play').textContent = '⏸ Pausar';
+  ytPlay();
   step();
 }
 
@@ -768,6 +789,7 @@ document.getElementById('btn-next').addEventListener('click', () => {
   pause();
   if (currentDay < data.days.length - 1) { currentDay++; render(currentDay, true); }
 });
+document.getElementById('btn-mute').addEventListener('click', ytToggleMute);
 document.getElementById('btn-speed').addEventListener('click', () => {
   speedIdx = (speedIdx + 1) % SPEEDS.length;
   document.getElementById('btn-speed').textContent = SPEEDS[speedIdx] + '×';
