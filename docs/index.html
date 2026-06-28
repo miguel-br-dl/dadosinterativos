@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Bolão da Copa 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #080D1B;
+  --track:    #141C30;
+  --gold:     #F5C518;
+  --light:    #EAEEF8;
+  --muted:    #5A6A8A;
+  --trans:    800ms;
+}
+
+body {
+  background: #040810;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* ── Frame 9:16 ── */
+#frame {
+  width: 1080px;
+  height: 1920px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+#frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(245,197,24,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245,197,24,.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Header ── */
+#header {
+  position: relative;
+  z-index: 1;
+  padding: 44px 60px 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 54px;
+  color: var(--light);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.title span { color: var(--gold); }
+
+.sub {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--muted);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+/* ── Chart ── */
+#chart {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow: hidden;
+}
+
+.bar-row {
+  position: absolute;
+  left: 52px;
+  right: 52px;
+  display: flex;
+  align-items: center;
+  transition: top var(--trans) ease-in-out;
+}
+
+.rank-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.avatar-wrap img,
+.avatar-initials {
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 2.5px solid var(--bg);
+}
+
+.avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: #fff;
+}
+
+.bar-track {
+  flex: 1;
+  border-radius: 0 22px 22px 0;
+  margin-left: -6px;
+  position: relative;
+  overflow: hidden;
+  background: var(--track);
+}
+
+.bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 0 22px 22px 0;
+  min-width: 4px;
+  transition: width var(--trans) ease-in-out;
+}
+
+.bar-name {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: rgba(255,255,255,.92);
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+
+.bar-pts {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--light);
+  text-align: right;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* ── Footer ── */
+#footer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 12px 60px 44px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.source {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+#date-block { text-align: right; line-height: 1; }
+
+#date-day {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: -2px;
+  display: block;
+}
+
+#date-month {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: var(--light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+}
+
+#date-year {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  display: block;
+  margin-top: 2px;
+}
+
+/* ── Controls ── */
+#controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8,13,27,.9);
+  border: 1px solid #1e2d4a;
+  border-radius: 40px;
+  padding: 10px 22px;
+  max-width: 1080px;
+  width: 100%;
+}
+
+#controls button, #controls select {
+  background: none;
+  border: 1px solid #2a3a5c;
+  color: var(--light);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+
+#controls button:hover, #controls select:hover {
+  background: #1a2540;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+#controls button:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+#controls select { padding: 5px 12px; }
+
+.ctrl-sep {
+  width: 1px;
+  height: 20px;
+  background: #2a3a5c;
+}
+
+.ctrl-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+#btn-record { border-color: #c0392b; color: #e74c3c; }
+#btn-record:hover { background: #2a1010; border-color: #e74c3c; color: #e74c3c; }
+#btn-record.recording { animation: pulse-red 1s infinite; }
+
+@keyframes pulse-red {
+  0%,100% { border-color: #e74c3c; }
+  50% { border-color: #ff6b6b; box-shadow: 0 0 8px #e74c3c; }
+}
+
+#progress-bar {
+  display: none;
+  width: 100%;
+  height: 3px;
+  background: #1e2d4a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+#progress-fill {
+  height: 100%;
+  background: var(--gold);
+  width: 0%;
+  transition: width .3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-row, .bar-fill { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="frame">
+  <div id="header">
+    <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
+    <div class="sub">Classificação dia a dia</div>
+  </div>
+  <div id="chart"></div>
+  <div id="footer">
+    <div class="source">Fonte: WebBolão</div>
+    <div id="date-block">
+      <span id="date-day">11</span>
+      <span id="date-month">JUN</span>
+      <span id="date-year">2026</span>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btn-prev">◀</button>
+  <button id="btn-play">▶ Play</button>
+  <button id="btn-next">▶</button>
+  <span class="ctrl-label" id="day-indicator">1/18</span>
+
+  <div class="ctrl-sep"></div>
+
+  <label class="ctrl-label" for="sel-topn">Top</label>
+  <select id="sel-topn">
+    <option value="5">5</option>
+    <option value="10" selected>10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="27">Todos</option>
+  </select>
+
+  <div class="ctrl-sep"></div>
+
+  <button id="btn-speed">1×</button>
+
+  <div class="ctrl-sep"></div>
+
+  <button id="btn-snapshot">📷 Foto</button>
+  <button id="btn-record">⏺ Gravar MP4</button>
+
+  <div id="progress-bar" style="width:100%">
+    <div id="progress-fill"></div>
+  </div>
+</div>
+
+<script>
+// ── Paleta ──
+const PALETTE = [
+  '#FF6B6B','#FF8E53','#FFD93D','#6BCB77','#4D96FF',
+  '#C77DFF','#48CAE4','#F72585','#06D6A0','#EF8C3A',
+  '#A8DADC','#E63946','#2EC4B6','#FFBA08','#9B5DE5',
+  '#00B4D8','#F77F00','#43AA8B','#E9C46A','#264653',
+  '#FF4D6D','#90BE6D','#577590','#F94144','#F3722C',
+  '#43BCCD','#B5E48C',
+];
+
+function colorForId(id) {
+  let h = 0;
+  for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff;
+  return PALETTE[Math.abs(h) % PALETTE.length];
+}
+
+function hexRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function initials(name) {
+  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+const MONTHS = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+function parseDate(iso) {
+  const [y,m,d] = iso.split('-');
+  return { day: d, month: MONTHS[parseInt(m)-1], year: y };
+}
+
+// ── State ──
+let data = null;
+let currentDay = 0;
+let topN = 10;
+let playing = false;
+let playTimer = null;
+const SPEEDS = [1, 1.5, 2, 3];
+let speedIdx = 0;
+
+const chart = document.getElementById('chart');
+const rows = {};  // userId → DOM row
+
+// ── Sizing (fixo, proporcional ao avatar) ──
+const AVATAR_D  = 44;   // diâmetro do avatar
+const ROW_H     = AVATAR_D + 14;  // altura da linha = avatar + padding
+const BAR_H     = AVATAR_D;       // barra do mesmo tamanho do avatar
+const FONT_SIZE = 14;
+const PAD_TOP   = 16;  // espaço antes da primeira linha
+
+// ── Render ──
+function render(dayIdx, animate) {
+  const day = data.days[dayIdx];
+  const entries = day.entries.slice(0, topN);
+  const maxPts = Math.max(...entries.map(e => e.points), 1);
+
+  // Update CSS transition speed
+  document.documentElement.style.setProperty('--trans', animate ? '800ms' : '0ms');
+
+  // Create missing rows
+  for (const e of entries) {
+    if (rows[e.user_id]) continue;
+    const color = colorForId(e.user_id);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.dataset.uid = e.user_id;
+
+    row.style.height = ROW_H + 'px';
+
+    // Rank
+    const rankEl = document.createElement('div');
+    rankEl.className = 'rank-num';
+    row.appendChild(rankEl);
+
+    // Avatar
+    const wrap = document.createElement('div');
+    wrap.className = 'avatar-wrap';
+    wrap.style.width = wrap.style.height = AVATAR_D + 'px';
+
+    const ini = document.createElement('div');
+    ini.className = 'avatar-initials';
+    ini.style.cssText = `background:${color};width:${AVATAR_D}px;height:${AVATAR_D}px;font-size:${(AVATAR_D*0.36).toFixed(0)}px`;
+    ini.textContent = initials(e.name);
+    wrap.appendChild(ini);
+
+    const img = document.createElement('img');
+    img.alt = e.name;
+    img.style.cssText = `display:none;width:${AVATAR_D}px;height:${AVATAR_D}px`;
+    img.onload  = () => { img.style.display = ''; ini.style.display = 'none'; };
+    img.onerror = () => { img.style.display = 'none'; ini.style.display = ''; };
+    if (e.avatar) img.src = e.avatar;
+    wrap.appendChild(img);
+    row.appendChild(wrap);
+
+    // Bar track
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    track.style.height = BAR_H + 'px';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.background = `linear-gradient(90deg,${hexRgba(color,.9)},${hexRgba(color,.6)})`;
+    const nameEl = document.createElement('div');
+    nameEl.className = 'bar-name';
+    nameEl.style.cssText += `left:${(AVATAR_D*0.4).toFixed(0)}px;font-size:${FONT_SIZE}px`;
+    nameEl.textContent = e.name;
+    track.appendChild(fill);
+    track.appendChild(nameEl);
+    row.appendChild(track);
+
+    // Points
+    const ptsEl = document.createElement('div');
+    ptsEl.className = 'bar-pts';
+    ptsEl.style.cssText = `font-size:${FONT_SIZE}px;width:${(FONT_SIZE*3.2).toFixed(0)}px`;
+    row.appendChild(ptsEl);
+
+    chart.appendChild(row);
+    rows[e.user_id] = row;
+  }
+
+  // Hide rows outside topN
+  for (const [uid, row] of Object.entries(rows)) {
+    row.style.visibility = entries.some(e => e.user_id === uid) ? '' : 'hidden';
+  }
+
+  // Update each row
+  entries.forEach((e, i) => {
+    const row = rows[e.user_id];
+    if (!row) return;
+
+    row.style.top = PAD_TOP + i * ROW_H + 'px';
+
+    // Avatar src update
+    const imgEl = row.querySelector('.avatar-wrap img');
+    if (e.avatar && imgEl && imgEl.src !== location.origin + '/' + e.avatar) imgEl.src = e.avatar;
+
+    // Bar fill width
+    row.querySelector('.bar-fill').style.width = Math.max((e.points / maxPts) * 100, 0.4) + '%';
+
+    // Points & rank
+    row.querySelector('.bar-pts').textContent = e.points;
+    row.querySelector('.rank-num').textContent = e.position;
+  });
+
+  // Date
+  const { day: d, month: m, year: y } = parseDate(day.date);
+  document.getElementById('date-day').textContent = d;
+  document.getElementById('date-month').textContent = m;
+  document.getElementById('date-year').textContent = y;
+  // Scale date font to frame size
+  document.getElementById('date-day').style.fontSize = '90px';
+  document.getElementById('date-month').style.fontSize = '32px';
+  document.getElementById('date-year').style.fontSize = '22px';
+
+  document.getElementById('day-indicator').textContent =
+    `${dayIdx + 1}/${data.days.length}`;
+}
+
+// ── Playback ──
+function pause() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById('btn-play').textContent = '▶ Play';
+}
+
+function play() {
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ Pausar';
+  step();
+}
+
+function step() {
+  if (!playing) return;
+  if (currentDay >= data.days.length - 1) { pause(); return; }
+  currentDay++;
+  render(currentDay, true);
+  const speed = SPEEDS[speedIdx];
+  const delay = (800 + 600) / speed;
+  playTimer = setTimeout(step, delay);
+}
+
+// ── Controls ──
+document.getElementById('btn-play').addEventListener('click', () => {
+  if (playing) pause(); else play();
+});
+document.getElementById('btn-prev').addEventListener('click', () => {
+  pause();
+  if (currentDay > 0) { currentDay--; render(currentDay, true); }
+});
+document.getElementById('btn-next').addEventListener('click', () => {
+  pause();
+  if (currentDay < data.days.length - 1) { currentDay++; render(currentDay, true); }
+});
+document.getElementById('btn-speed').addEventListener('click', () => {
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  document.getElementById('btn-speed').textContent = SPEEDS[speedIdx] + '×';
+});
+document.getElementById('sel-topn').addEventListener('change', e => {
+  topN = parseInt(e.target.value);
+  render(currentDay, false);
+});
+
+// ── Snapshot PNG ──
+document.getElementById('btn-snapshot').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-snapshot');
+  btn.disabled = true; btn.textContent = '⏳ Gerando...';
+  try {
+    const canvas = await html2canvas(document.getElementById('frame'), {
+      scale: 1, useCORS: true, backgroundColor: '#080D1B',
+    });
+    const a = document.createElement('a');
+    const { day, month, year } = parseDate(data.days[currentDay].date);
+    a.download = `bolao-${year}-${data.days[currentDay].date.slice(5,7)}-${day}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } finally {
+    btn.disabled = false; btn.textContent = '📷 Foto';
+  }
+});
+
+// ── Video Export (canvas renderer, 16:9) ──
+const VIDEO_W = 1280, VIDEO_H = 720;
+const VIDEO_FPS = 30;
+const TRANS_SECS = 1.0;
+const HOLD_SECS  = 0.6;
+
+function easeInOut(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
+
+// Preloaded avatar images for canvas rendering
+const avatarImages = {};
+async function preloadAvatars() {
+  const urls = new Set();
+  for (const day of data.days) for (const e of day.entries) if (e.avatar) urls.add(e.avatar);
+  await Promise.allSettled([...urls].map(url => new Promise(res => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => { avatarImages[url] = img; res(); };
+    img.onerror = res;
+    img.src = url;
+  })));
+}
+
+function drawFrame(ctx, dayIdx, t, prevMap) {
+  const W = VIDEO_W, H = VIDEO_H;
+  const day = data.days[dayIdx];
+  const entries = day.entries.slice(0, topN);
+  const maxPts = Math.max(...entries.map(e => e.points), 1);
+
+  const HEADER_H = 90;
+  const FOOTER_H = 80;
+  const CHART_H  = H - HEADER_H - FOOTER_H;
+  const ROW_H    = CHART_H / topN;
+  const AVATAR_D = Math.min(36, ROW_H - 8);
+  const BAR_H    = Math.max(18, ROW_H - 12);
+  const FONT_SZ  = Math.max(10, Math.min(14, ROW_H * 0.28));
+  const LEFT_PAD = 50;
+  const RIGHT_PAD= 50;
+  const BAR_LEFT = LEFT_PAD + 32 + 10 + AVATAR_D + 6;
+  const BAR_W    = W - BAR_LEFT - RIGHT_PAD - (FONT_SZ * 3.5);
+  const RADIUS   = BAR_H / 2;
+
+  // Background
+  ctx.fillStyle = '#080D1B';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(245,197,24,0.025)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x,.5); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Header
+  ctx.fillStyle = '#EAEEF8';
+  ctx.font = 'bold 38px "Barlow Condensed", sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('⚽ BOLÃO DA ', LEFT_PAD, HEADER_H/2);
+  const w1 = ctx.measureText('⚽ BOLÃO DA ').width;
+  ctx.fillStyle = '#F5C518';
+  ctx.fillText('COPA 2026', LEFT_PAD + w1, HEADER_H/2);
+  ctx.fillStyle = '#5A6A8A';
+  ctx.font = '500 13px Inter, sans-serif';
+  ctx.fillText('CLASSIFICAÇÃO DIA A DIA', LEFT_PAD, HEADER_H - 14);
+
+  // Bars
+  entries.forEach((e, i) => {
+    const color = colorForId(e.user_id);
+
+    // Interpolate y and points if transitioning
+    let targetY = HEADER_H + i * ROW_H + ROW_H/2;
+    let pts = e.points;
+    if (prevMap && t < 1) {
+      const prev = prevMap[e.user_id];
+      if (prev !== undefined) {
+        const prevY = HEADER_H + prev.rank * ROW_H + ROW_H/2;
+        targetY = prevY + (targetY - prevY) * easeInOut(t);
+        pts = Math.round(prev.points + (e.points - prev.points) * easeInOut(t));
+      }
+    }
+    const barTopY = targetY - BAR_H/2;
+
+    // Rank
+    ctx.fillStyle = '#5A6A8A';
+    ctx.font = `bold ${FONT_SZ}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(e.position, LEFT_PAD + 26, targetY);
+
+    // Avatar circle
+    const cx = LEFT_PAD + 32 + 10 + AVATAR_D/2;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, targetY, AVATAR_D/2, 0, Math.PI*2); ctx.clip();
+    const aimg = avatarImages[e.avatar];
+    if (aimg) {
+      ctx.drawImage(aimg, cx - AVATAR_D/2, targetY - AVATAR_D/2, AVATAR_D, AVATAR_D);
+    } else {
+      ctx.fillStyle = color;
+      ctx.fillRect(cx - AVATAR_D/2, targetY - AVATAR_D/2, AVATAR_D, AVATAR_D);
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${AVATAR_D * 0.36}px "Barlow Condensed", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(initials(e.name), cx, targetY + 1);
+    }
+    ctx.restore();
+
+    // Bar track
+    ctx.fillStyle = '#141C30';
+    roundRect(ctx, BAR_LEFT, barTopY, BAR_W, BAR_H, RADIUS);
+
+    // Bar fill
+    const fillW = Math.max((pts / maxPts) * BAR_W, 4);
+    const grad = ctx.createLinearGradient(BAR_LEFT, 0, BAR_LEFT + fillW, 0);
+    grad.addColorStop(0, hexRgba(color, .9));
+    grad.addColorStop(1, hexRgba(color, .6));
+    ctx.fillStyle = grad;
+    roundRect(ctx, BAR_LEFT, barTopY, fillW, BAR_H, RADIUS);
+
+    // Name
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.font = `600 ${FONT_SZ}px Inter, sans-serif`;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4;
+    ctx.fillText(e.name, BAR_LEFT + AVATAR_D * 0.4, targetY);
+    ctx.shadowBlur = 0;
+
+    // Points
+    ctx.fillStyle = '#EAEEF8';
+    ctx.font = `bold ${FONT_SZ}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'left';
+    ctx.fillText(pts, BAR_LEFT + BAR_W + 8, targetY);
+  });
+
+  // Date (bottom right)
+  const { day: d, month: m, year: y } = parseDate(day.date);
+  ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+  ctx.fillStyle = '#F5C518';
+  ctx.font = 'bold 72px "Barlow Condensed", sans-serif';
+  ctx.fillText(d, W - RIGHT_PAD, H - FOOTER_H/2 + 14);
+  const dw = ctx.measureText(d).width;
+  ctx.fillStyle = '#EAEEF8';
+  ctx.font = 'bold 24px "Barlow Condensed", sans-serif';
+  ctx.fillText(m, W - RIGHT_PAD, H - FOOTER_H/2 - 24);
+  ctx.fillStyle = '#5A6A8A';
+  ctx.font = 'bold 16px "Barlow Condensed", sans-serif';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(y, W - RIGHT_PAD, H - 12);
+
+  // Source
+  ctx.fillStyle = '#5A6A8A';
+  ctx.font = '13px Inter, sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Fonte: WebBolão', LEFT_PAD, H - 12);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+async function exportVideo() {
+  const btn = document.getElementById('btn-record');
+  const progressBar = document.getElementById('progress-bar');
+  const progressFill = document.getElementById('progress-fill');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Preparando...';
+  btn.classList.add('recording');
+  progressBar.style.display = 'block';
+
+  await preloadAvatars();
+
+  const canvas = document.createElement('canvas');
+  canvas.width = VIDEO_W; canvas.height = VIDEO_H;
+  const ctx = canvas.getContext('2d');
+
+  const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
+    ? 'video/mp4;codecs=avc1'
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : 'video/webm';
+
+  const stream = canvas.captureStream(VIDEO_FPS);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  recorder.onstop = () => {
+    const type = mimeType.split(';')[0];
+    const ext  = type.includes('mp4') ? 'mp4' : 'webm';
+    const blob = new Blob(chunks, { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `bolao-copa-2026.${ext}`;
+    a.click();
+    btn.disabled = false;
+    btn.textContent = '⏺ Gravar MP4';
+    btn.classList.remove('recording');
+    progressBar.style.display = 'none';
+    progressFill.style.width = '0%';
+  };
+
+  recorder.start();
+
+  const totalDays = data.days.length;
+  const transFrames = Math.round(TRANS_SECS * VIDEO_FPS);
+  const holdFrames  = Math.round(HOLD_SECS  * VIDEO_FPS);
+  const totalFrames = totalDays * (transFrames + holdFrames);
+  let framesDone = 0;
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  for (let d = 0; d < totalDays; d++) {
+    btn.textContent = `⏺ Dia ${d+1}/${totalDays}`;
+
+    // Build prevMap
+    let prevMap = null;
+    if (d > 0) {
+      prevMap = {};
+      data.days[d-1].entries.slice(0, topN).forEach((e, i) => {
+        prevMap[e.user_id] = { rank: i, points: e.points };
+      });
+    }
+
+    // Transition frames
+    for (let f = 0; f < transFrames; f++) {
+      drawFrame(ctx, d, f / transFrames, prevMap);
+      framesDone++;
+      progressFill.style.width = (framesDone / totalFrames * 100) + '%';
+      await sleep(1000 / VIDEO_FPS);
+    }
+    // Hold frames
+    for (let f = 0; f < holdFrames; f++) {
+      drawFrame(ctx, d, 1, null);
+      framesDone++;
+      progressFill.style.width = (framesDone / totalFrames * 100) + '%';
+      await sleep(1000 / VIDEO_FPS);
+    }
+  }
+
+  recorder.stop();
+}
+
+document.getElementById('btn-record').addEventListener('click', exportVideo);
+
+// ── Load ──
+fetch('data.json')
+  .then(r => r.json())
+  .then(d => {
+    data = d;
+    render(0, false);
+    setTimeout(() => {
+      document.documentElement.style.setProperty('--trans', '800ms');
+    }, 100);
+  })
+  .catch(err => {
+    chart.innerHTML = `<p style="color:#F5C518;padding:40px;font-family:Inter">
+      Erro: ${err.message}<br>Sirva via HTTP: python -m http.server 8765</p>`;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Credenciais — nunca commitar
+.env
+
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# HTML bruto baixado do WebBolão (pode conter dados pessoais)
+data/raw/
+
+# Arquivos temporários de teste
+test_login.py
+screenshot-*.png
+.playwright-mcp/
+
+# Editores
+.vscode/
+.idea/
+*.swp
