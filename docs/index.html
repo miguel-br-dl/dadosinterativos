@@ -269,6 +269,44 @@ body {
   margin-left: 3px;
 }
 
+/* ── Botões no header ── */
+#header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+#header-actions button {
+  background: rgba(0,122,47,0.10);
+  border: 1px solid rgba(0,100,30,0.25);
+  color: var(--light);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, border-color .15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+#header-actions button:hover {
+  background: rgba(0,122,47,0.22);
+  border-color: var(--br-green);
+}
+
+#btn-play-top {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 13px !important;
+  background: rgba(0,122,47,0.18) !important;
+  border-color: rgba(0,100,30,0.40) !important;
+}
+
 /* ── Controls ── */
 #controls {
   display: flex;
@@ -502,6 +540,11 @@ body {
   <div id="header">
     <div id="header-top">
       <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
+      <div id="header-actions">
+        <button id="btn-restart-top" aria-label="Recomeçar">⏮</button>
+        <button id="btn-play-top" aria-label="Play/Pause">▶</button>
+        <button id="btn-last-top" aria-label="Último dia">⏭</button>
+      </div>
       <div id="date-block">
         <span id="date-day">11</span>
         <span id="date-month">JUN</span>
@@ -535,7 +578,7 @@ body {
 
   <div class="ctrl-sep"></div>
 
-  <button id="btn-speed">1×</button>
+  <button id="btn-speed">1.5×</button>
 
   <div class="ctrl-sep"></div>
 
@@ -622,14 +665,42 @@ function parseDate(iso) {
   return { day: d, month: MONTHS[parseInt(m)-1], year: y };
 }
 
+// ── Sub-frame interpolation ──
+const SUBSTEPS = 5;
+
+function buildFrames(days) {
+  const frames = [];
+  frames.push({ ...days[0], _sub: false, _dayIdx: 0 });
+
+  for (let d = 1; d < days.length; d++) {
+    const prev = days[d - 1];
+    const next = days[d];
+    const prevPts = {};
+    prev.entries.forEach(e => prevPts[e.user_id] = e.points);
+
+    for (let s = 1; s <= SUBSTEPS; s++) {
+      const t = s / SUBSTEPS;
+      const interp = next.entries.map(e => {
+        const p0 = prevPts[e.user_id] ?? e.points;
+        return { ...e, points: Math.round(p0 + (e.points - p0) * t) };
+      });
+      interp.sort((a, b) => b.points - a.points);
+      interp.forEach((e, i) => { e.position = i + 1; });
+      frames.push({ date: next.date, entries: interp, _sub: s < SUBSTEPS, _dayIdx: d });
+    }
+  }
+  return frames;
+}
+
 // ── State ──
 let data = null;
+let frames = [];
 let currentDay = 0;
 let topN = 27;
 let playing = false;
 let playTimer = null;
 const SPEEDS = [1, 1.5, 2, 3];
-let speedIdx = 0;
+let speedIdx = 1;
 
 const chart = document.getElementById('chart');
 const rows = {};  // userId → DOM row
@@ -643,15 +714,14 @@ const PAD_TOP   = 8;   // espaço antes da primeira linha
 
 // ── Render ──
 function render(dayIdx, animate) {
-  const day = data.days[dayIdx];
+  const day = frames[dayIdx];
   const entries = day.entries.slice(0, topN);
   const maxPts = Math.max(...entries.map(e => e.points), 1);
   const minPts = Math.min(...entries.map(e => e.points));
   const ptsRange = maxPts - minPts || 1;
   const BAR_BASE = 0.25;
 
-  // Update CSS transition speed
-  document.documentElement.style.setProperty('--trans', animate ? '800ms' : '0ms');
+  document.documentElement.style.setProperty('--trans', animate ? '600ms' : '0ms');
 
   // Chart height = exact content
   chart.style.height = (PAD_TOP + entries.length * ROW_H + 8) + 'px';
@@ -749,31 +819,37 @@ function render(dayIdx, animate) {
   // Scale date font to frame size
 
   document.getElementById('day-indicator').textContent =
-    `${dayIdx + 1}/${data.days.length}`;
+    `${day._dayIdx + 1}/${data.days.length}`;
 }
 
 // ── Playback ──
+function syncPlayButtons(isPlaying) {
+  document.getElementById('btn-play').textContent     = isPlaying ? '⏸ Pausar' : '▶ Play';
+  document.getElementById('btn-play-top').textContent = isPlaying ? '⏸' : '▶';
+}
+
 function pause() {
   playing = false;
   clearTimeout(playTimer);
-  document.getElementById('btn-play').textContent = '▶ Play';
+  syncPlayButtons(false);
   ytPause();
 }
 
 function play() {
   playing = true;
-  document.getElementById('btn-play').textContent = '⏸ Pausar';
+  syncPlayButtons(true);
   ytPlay();
   step();
 }
 
 function step() {
   if (!playing) return;
-  if (currentDay >= data.days.length - 1) { pause(); return; }
+  if (currentDay >= frames.length - 1) { pause(); return; }
   currentDay++;
   render(currentDay, true);
   const speed = SPEEDS[speedIdx];
-  const delay = (800 + 600) / speed;
+  const isSub = frames[currentDay]._sub;
+  const delay = isSub ? 220 / speed : (600 + 500) / speed;
   playTimer = setTimeout(step, delay);
 }
 
@@ -783,11 +859,38 @@ document.getElementById('btn-play').addEventListener('click', () => {
 });
 document.getElementById('btn-prev').addEventListener('click', () => {
   pause();
-  if (currentDay > 0) { currentDay--; render(currentDay, true); }
+  const targetDay = frames[currentDay]._dayIdx - 1;
+  if (targetDay < 0) return;
+  // Encontra o último frame do dia anterior (o não-sub)
+  let idx = currentDay - 1;
+  while (idx > 0 && frames[idx]._dayIdx > targetDay) idx--;
+  currentDay = idx;
+  render(currentDay, true);
 });
 document.getElementById('btn-next').addEventListener('click', () => {
   pause();
-  if (currentDay < data.days.length - 1) { currentDay++; render(currentDay, true); }
+  const targetDay = frames[currentDay]._dayIdx + 1;
+  if (targetDay >= data.days.length) return;
+  // Encontra o último sub-frame (= o frame real) do próximo dia
+  let idx = currentDay + 1;
+  while (idx < frames.length - 1 && frames[idx]._dayIdx < targetDay) idx++;
+  // Garante que chegamos no frame real (não sub)
+  while (idx < frames.length - 1 && frames[idx]._sub) idx++;
+  currentDay = idx;
+  render(currentDay, true);
+});
+document.getElementById('btn-play-top').addEventListener('click', () => {
+  if (playing) pause(); else play();
+});
+document.getElementById('btn-restart-top').addEventListener('click', () => {
+  pause();
+  currentDay = 0;
+  render(0, false);
+});
+document.getElementById('btn-last-top').addEventListener('click', () => {
+  pause();
+  currentDay = frames.length - 1;
+  render(currentDay, false);
 });
 document.getElementById('btn-mute').addEventListener('click', ytToggleMute);
 document.getElementById('btn-speed').addEventListener('click', () => {
@@ -808,8 +911,8 @@ document.getElementById('btn-snapshot').addEventListener('click', async () => {
       scale: 1, useCORS: true, backgroundColor: '#080D1B',
     });
     const a = document.createElement('a');
-    const { day, month, year } = parseDate(data.days[currentDay].date);
-    a.download = `bolao-${year}-${data.days[currentDay].date.slice(5,7)}-${day}.png`;
+    const { day, month, year } = parseDate(frames[currentDay].date);
+    a.download = `bolao-${year}-${frames[currentDay].date.slice(5,7)}-${day}.png`;
     a.href = canvas.toDataURL('image/png');
     a.click();
   } finally {
@@ -1191,6 +1294,7 @@ fetch('data.json')
   .then(r => r.json())
   .then(d => {
     data = d;
+    frames = buildFrames(data.days);
     render(0, false);
     setTimeout(() => {
       document.documentElement.style.setProperty('--trans', '800ms');
