@@ -11,18 +11,22 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #080D1B;
-  --track:    #141C30;
-  --gold:     #F5C518;
-  --light:    #EAEEF8;
-  --muted:    #5A6A8A;
+  --bg:       #EFF7EE;
+  --track:    rgba(0,90,20,0.09);
+  --gold:     #B86A00;
+  --light:    #0D2010;
+  --muted:    #3A5A3A;
   --trans:    800ms;
+  --br-green: #007A2F;
+  --br-yellow:#B86A00;
+  --br-blue:  #002776;
 }
 
 body {
   background: var(--bg);
   display: flex;
   flex-direction: column;
+  align-items: center;
   height: 100vh;
   overflow: hidden;
   font-family: 'Inter', sans-serif;
@@ -31,47 +35,54 @@ body {
 /* ── Frame ── */
 #frame {
   flex-shrink: 0;
-  width: 60vw;
-  min-width: 480px;
+  width: 25vw;
+  min-width: 380px;
   background: var(--bg);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(0,156,59,.15), 0 24px 60px rgba(0,0,0,.5);
 }
 
-#frame::before {
-  content: '';
+/* ── Background decorativo ── */
+#bg-deco {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(245,197,24,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(245,197,24,.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
   z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 /* ── Header ── */
 #header {
   position: relative;
   z-index: 1;
-  padding: 14px 32px 8px;
+  padding: 12px 20px 6px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+#header-top {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
+  justify-content: space-between;
 }
 
 .title {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
-  font-size: 32px;
+  font-size: 22px;
   color: var(--light);
   line-height: 1;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  text-shadow: 0 2px 12px rgba(0,0,0,.6);
 }
-.title span { color: var(--gold); }
+.title span { color: var(--br-yellow); }
 
 .sub {
   font-family: 'Inter', sans-serif;
@@ -121,7 +132,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  border: 2.5px solid var(--bg);
+  border: 2px solid rgba(255,255,255,0.7);
 }
 
 .avatar-initials {
@@ -139,7 +150,8 @@ body {
   margin-left: -6px;
   position: relative;
   overflow: hidden;
-  background: var(--track);
+  background: rgba(5,22,10,0.85);
+  border: 1px solid rgba(0,156,59,.12);
 }
 
 .bar-fill {
@@ -169,6 +181,7 @@ body {
   text-align: right;
   flex-shrink: 0;
   margin-left: 8px;
+  text-shadow: none;
 }
 
 /* ── Footer ── */
@@ -191,7 +204,6 @@ body {
 #date-block {
   text-align: right;
   line-height: 1;
-  margin-left: auto;
   flex-shrink: 0;
 }
 
@@ -232,16 +244,21 @@ body {
   gap: 8px;
   align-items: center;
   justify-content: center;
-  background: rgba(8,13,27,.97);
-  border-top: 1px solid #1e2d4a;
+  background: rgba(220,240,220,.97);
+  border: 1px solid rgba(0,100,30,.2);
+  border-top: none;
   padding: 8px 20px;
   flex-shrink: 0;
   margin-top: auto;
+  width: 25vw;
+  min-width: 380px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
 }
 
 #controls button, #controls select {
   background: none;
-  border: 1px solid #2a3a5c;
+  border: 1px solid rgba(0,100,30,.3);
   color: var(--light);
   padding: 6px 16px;
   border-radius: 20px;
@@ -252,9 +269,9 @@ body {
 }
 
 #controls button:hover, #controls select:hover {
-  background: #1a2540;
-  border-color: var(--gold);
-  color: var(--gold);
+  background: rgba(0,100,30,.12);
+  border-color: var(--br-green);
+  color: var(--br-green);
 }
 
 #controls button:disabled {
@@ -267,7 +284,7 @@ body {
 .ctrl-sep {
   width: 1px;
   height: 20px;
-  background: #2a3a5c;
+  background: rgba(0,100,30,.25);
 }
 
 .ctrl-label {
@@ -294,9 +311,13 @@ body {
   overflow: hidden;
 }
 
+#progress-bar {
+  background: rgba(0,100,30,.15);
+}
+
 #progress-fill {
   height: 100%;
-  background: var(--gold);
+  background: var(--br-green);
   width: 0%;
   transition: width .3s;
 }
@@ -309,14 +330,154 @@ body {
 <body>
 
 <div id="frame">
+
+  <!-- ══ Decoração estática de fundo ══ -->
+  <div id="bg-deco"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 700" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+    <defs>
+      <!-- Listras do gramado: horizontal, alternadas -->
+      <pattern id="p-grass" width="400" height="50" patternUnits="userSpaceOnUse">
+        <rect width="400" height="25" fill="rgba(0,120,40,0.05)"/>
+      </pattern>
+      <!-- Rede do gol -->
+      <pattern id="p-net" width="10" height="10" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="10" y2="10" stroke="rgba(0,80,20,0.14)" stroke-width="0.6"/>
+        <line x1="10" y1="0" x2="0" y2="10" stroke="rgba(0,80,20,0.14)" stroke-width="0.6"/>
+      </pattern>
+      <clipPath id="clip-goal">
+        <rect x="80" y="0" width="240" height="54"/>
+      </clipPath>
+    </defs>
+
+    <!-- ── Gramado: listras horizontais ── -->
+    <rect width="400" height="700" fill="url(#p-grass)"/>
+
+    <!-- ── Marcações do campo (top-view, faint) ── -->
+    <!-- Linha do meio-campo -->
+    <line x1="0" y1="350" x2="400" y2="350" stroke="rgba(0,100,30,0.09)" stroke-width="1.5"/>
+    <!-- Círculo central -->
+    <circle cx="200" cy="350" r="88" fill="none" stroke="rgba(0,100,30,0.09)" stroke-width="1.5"/>
+    <circle cx="200" cy="350" r="4" fill="rgba(0,100,30,0.12)"/>
+    <!-- Área de penalti superior -->
+    <rect x="80" y="0" width="240" height="90" fill="none" stroke="rgba(0,100,30,0.09)" stroke-width="1.5"/>
+    <!-- Área pequena superior -->
+    <rect x="140" y="0" width="120" height="38" fill="none" stroke="rgba(0,100,30,0.08)" stroke-width="1.2"/>
+    <!-- Arco de penalti superior -->
+    <path d="M125,90 Q200,138 275,90" fill="none" stroke="rgba(0,100,30,0.07)" stroke-width="1.2"/>
+    <!-- Área de penalti inferior -->
+    <rect x="80" y="610" width="240" height="90" fill="none" stroke="rgba(0,100,30,0.09)" stroke-width="1.5"/>
+    <!-- Área pequena inferior -->
+    <rect x="140" y="662" width="120" height="38" fill="none" stroke="rgba(0,100,30,0.08)" stroke-width="1.2"/>
+    <!-- Arco de penalti inferior -->
+    <path d="M125,610 Q200,562 275,610" fill="none" stroke="rgba(0,100,30,0.07)" stroke-width="1.2"/>
+    <!-- Arcos de corner -->
+    <path d="M0,0 A18,18 0 0,1 18,18" fill="none" stroke="rgba(0,100,30,0.08)" stroke-width="1.2"/>
+    <path d="M400,0 A18,18 0 0,0 382,18" fill="none" stroke="rgba(0,100,30,0.08)" stroke-width="1.2"/>
+    <path d="M0,700 A18,18 0 0,0 18,682" fill="none" stroke="rgba(0,100,30,0.08)" stroke-width="1.2"/>
+    <path d="M400,700 A18,18 0 0,1 382,682" fill="none" stroke="rgba(0,100,30,0.08)" stroke-width="1.2"/>
+    <!-- Marcação de penalti superior e inferior -->
+    <circle cx="200" cy="72" r="3" fill="rgba(0,100,30,0.12)"/>
+    <circle cx="200" cy="628" r="3" fill="rgba(0,100,30,0.12)"/>
+
+    <!-- ── GOL + BOLA ENTRANDO (topo, centralizado) ── -->
+    <!-- Trave esquerda -->
+    <line x1="82" y1="0" x2="82" y2="54" stroke="rgba(0,60,20,0.30)" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Trave direita -->
+    <line x1="318" y1="0" x2="318" y2="54" stroke="rgba(0,60,20,0.30)" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Travessão -->
+    <line x1="82" y1="54" x2="318" y2="54" stroke="rgba(0,60,20,0.30)" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Rede -->
+    <rect x="82" y="0" width="236" height="54" fill="url(#p-net)" opacity="1"/>
+    <!-- Bola entrando no gol (deslocada para canto direito do gol) -->
+    <g transform="translate(272,36)">
+      <circle r="22" fill="rgba(240,240,240,0.70)" stroke="rgba(0,80,20,0.25)" stroke-width="1.5"/>
+      <!-- Pentagono central da bola -->
+      <polygon points="0,-9 8.6,-2.8 5.3,7.2 -5.3,7.2 -8.6,-2.8" fill="rgba(0,80,20,0.18)" stroke="rgba(0,80,20,0.20)" stroke-width="0.8"/>
+      <!-- Linhas da bola -->
+      <line x1="0" y1="-22" x2="0" y2="-9" stroke="rgba(0,80,20,0.15)" stroke-width="1"/>
+      <line x1="20.9" y1="7.6" x2="8.6" y2="-2.8" stroke="rgba(0,80,20,0.15)" stroke-width="1"/>
+      <line x1="-20.9" y1="7.6" x2="-8.6" y2="-2.8" stroke="rgba(0,80,20,0.15)" stroke-width="1"/>
+      <line x1="12.9" y1="-18.5" x2="5.3" y2="7.2" stroke="rgba(0,80,20,0.15)" stroke-width="1"/>
+      <line x1="-12.9" y1="-18.5" x2="-5.3" y2="7.2" stroke="rgba(0,80,20,0.15)" stroke-width="1"/>
+    </g>
+    <!-- Rastro de movimento da bola -->
+    <line x1="320" y1="10" x2="272" y2="36" stroke="rgba(0,80,20,0.10)" stroke-width="2" stroke-dasharray="4,4"/>
+
+    <!-- ── JOGADOR 1: chutando (lado esquerdo) ── -->
+    <g transform="translate(38,320)" opacity="0.11" fill="rgba(0,70,20,1)">
+      <circle cx="0" cy="-50" r="10"/><!-- cabeça -->
+      <ellipse cx="0" cy="-28" rx="8" ry="13"/><!-- torso -->
+      <!-- braço esq levantado (equilíbrio) -->
+      <line x1="-6" y1="-35" x2="-22" y2="-46" stroke="rgba(0,70,20,0.11)" stroke-width="6" stroke-linecap="round"/>
+      <!-- braço dir -->
+      <line x1="6" y1="-34" x2="20" y2="-26" stroke="rgba(0,70,20,0.11)" stroke-width="6" stroke-linecap="round"/>
+      <!-- perna esq plantada -->
+      <line x1="-3" y1="-15" x2="-4" y2="8" stroke="rgba(0,70,20,0.11)" stroke-width="8" stroke-linecap="round"/>
+      <line x1="-4" y1="8" x2="-2" y2="22" stroke="rgba(0,70,20,0.11)" stroke-width="6" stroke-linecap="round"/>
+      <!-- perna dir chutando: horizontal para frente -->
+      <line x1="3" y1="-15" x2="22" y2="-20" stroke="rgba(0,70,20,0.11)" stroke-width="8" stroke-linecap="round"/>
+      <line x1="22" y1="-20" x2="36" y2="-10" stroke="rgba(0,70,20,0.11)" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- ── JOGADOR 2: correndo (lado direito, virado para esq) ── -->
+    <g transform="translate(362,470) scale(-1,1)" opacity="0.10" fill="rgba(0,70,20,1)">
+      <circle cx="0" cy="-50" r="10"/>
+      <ellipse cx="0" cy="-28" rx="8" ry="13"/>
+      <line x1="-6" y1="-35" x2="-20" y2="-44" stroke="rgba(0,70,20,0.10)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="6" y1="-33" x2="20" y2="-24" stroke="rgba(0,70,20,0.10)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-3" y1="-15" x2="-14" y2="6" stroke="rgba(0,70,20,0.10)" stroke-width="8" stroke-linecap="round"/>
+      <line x1="-14" y1="6" x2="-8" y2="22" stroke="rgba(0,70,20,0.10)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="3" y1="-15" x2="16" y2="4" stroke="rgba(0,70,20,0.10)" stroke-width="8" stroke-linecap="round"/>
+      <line x1="16" y1="4" x2="22" y2="22" stroke="rgba(0,70,20,0.10)" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- ── JOGADOR 3: goleiro mergulhando (inferior esquerdo) ── -->
+    <g transform="translate(65,590) rotate(-25)" opacity="0.09">
+      <circle cx="-22" cy="-8" r="10" fill="rgba(0,70,20,0.09)"/>
+      <ellipse cx="0" cy="4" rx="18" ry="8" fill="rgba(0,70,20,0.09)"/>
+      <!-- dois braços estendidos para a direita -->
+      <line x1="14" y1="-2" x2="34" y2="-12" stroke="rgba(0,70,20,0.09)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="14" y1="4" x2="34" y2="12" stroke="rgba(0,70,20,0.09)" stroke-width="6" stroke-linecap="round"/>
+      <!-- pernas dobradas atrás -->
+      <line x1="-12" y1="10" x2="-24" y2="26" stroke="rgba(0,70,20,0.09)" stroke-width="7" stroke-linecap="round"/>
+      <line x1="-6" y1="12" x2="2" y2="28" stroke="rgba(0,70,20,0.09)" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <!-- ── BOLA grande: lado direito, parcialmente fora ── -->
+    <g transform="translate(376,260)" opacity="0.10" stroke="rgba(0,80,20,0.10)" fill="none">
+      <circle r="60" stroke-width="2"/>
+      <polygon points="0,-20 19,-6.2 11.8,16.2 -11.8,16.2 -19,-6.2" fill="rgba(0,80,20,0.08)" stroke-width="1"/>
+      <line x1="0" y1="-60" x2="0" y2="-20" stroke-width="1.2"/>
+      <line x1="57" y1="19.4" x2="19" y2="-6.2" stroke-width="1.2"/>
+      <line x1="-57" y1="19.4" x2="-19" y2="-6.2" stroke-width="1.2"/>
+      <line x1="35" y1="-49" x2="11.8" y2="16.2" stroke-width="1.2"/>
+      <line x1="-35" y1="-49" x2="-11.8" y2="16.2" stroke-width="1.2"/>
+    </g>
+
+    <!-- ── BOLA pequena: inferior esquerdo ── -->
+    <g transform="translate(48,628)" opacity="0.09" stroke="rgba(0,80,20,0.09)" fill="none">
+      <circle r="30" stroke-width="1.5"/>
+      <polygon points="0,-10 9.5,-3.1 5.9,8.1 -5.9,8.1 -9.5,-3.1" fill="rgba(0,80,20,0.07)" stroke-width="0.8"/>
+      <line x1="0" y1="-30" x2="0" y2="-10" stroke-width="1"/>
+      <line x1="28.5" y1="9.7" x2="9.5" y2="-3.1" stroke-width="1"/>
+      <line x1="-28.5" y1="9.7" x2="-9.5" y2="-3.1" stroke-width="1"/>
+    </g>
+
+    <!-- ── Faixa Brasil: esquerda ── -->
+    <rect x="0" y="0"   width="6" height="233" fill="rgba(0,122,47,0.55)"/>
+    <rect x="0" y="233" width="6" height="234" fill="rgba(184,106,0,0.55)"/>
+    <rect x="0" y="467" width="6" height="233" fill="rgba(0,39,118,0.55)"/>
+  </svg></div>
+
   <div id="header">
-    <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
-    <div class="sub">Classificação dia a dia</div>
-    <div id="date-block">
-      <span id="date-day">11</span>
-      <span id="date-month">JUN</span>
-      <span id="date-year">2026</span>
+    <div id="header-top">
+      <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
+      <div id="date-block">
+        <span id="date-day">11</span>
+        <span id="date-month">JUN</span>
+        <span id="date-year">2026</span>
+      </div>
     </div>
+    <div class="sub">Classificação dia a dia</div>
   </div>
   <div id="chart"></div>
   <div id="footer">
@@ -357,13 +518,35 @@ body {
 
 <script>
 // ── Paleta ──
+// Paleta: cores dos times nacionais da América Latina (CONMEBOL + CONCACAF)
 const PALETTE = [
-  '#FF6B6B','#FF8E53','#FFD93D','#6BCB77','#4D96FF',
-  '#C77DFF','#48CAE4','#F72585','#06D6A0','#EF8C3A',
-  '#A8DADC','#E63946','#2EC4B6','#FFBA08','#9B5DE5',
-  '#00B4D8','#F77F00','#43AA8B','#E9C46A','#264653',
-  '#FF4D6D','#90BE6D','#577590','#F94144','#F3722C',
-  '#43BCCD','#B5E48C',
+  '#009C3B', // Brasil — verde
+  '#7EC8E3', // Argentina — celeste
+  '#CC0001', // Chile — vermelho
+  '#FCD116', // Colômbia — amarelo
+  '#003087', // Colômbia — azul
+  '#006847', // México — verde
+  '#0066AA', // Uruguai — azul celeste
+  '#D52B1E', // Bolívia — vermelho
+  '#0073CF', // Honduras — azul
+  '#EF3340', // Equador — vermelho
+  '#CF142B', // Cuba — vermelho
+  '#002B7F', // Costa Rica — azul
+  '#B22234', // EUA — vermelho
+  '#009B3A', // Jamaica — verde
+  '#D4961C', // Jamaica — dourado
+  '#3C3B6E', // EUA — azul marinho
+  '#0F47AF', // El Salvador — azul
+  '#CE1126', // Peru — vermelho
+  '#DA121A', // Panamá — vermelho
+  '#00209F', // Haiti — azul
+  '#002A8F', // Paraguai — azul
+  '#CF9E0C', // Venezuela — dourado
+  '#5B2D8E', // Caribe — roxo
+  '#006666', // Suriname — verde-azul
+  '#8B0000', // Trinidad — vinho
+  '#005A9C', // Guatemala — azul médio
+  '#C0392B', // Venezuela — vermelho
 ];
 
 function colorForId(id) {
@@ -584,6 +767,126 @@ const HOLD_SECS  = 0.6;
 
 function easeInOut(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
 
+// ── Fundo decorativo no canvas — tema claro ──
+function drawBackground(ctx, W, H) {
+  // Base: verde-branco claro
+  ctx.fillStyle = '#EFF7EE';
+  ctx.fillRect(0, 0, W, H);
+
+  // Listras horizontais do gramado
+  ctx.fillStyle = 'rgba(0,120,40,0.05)';
+  for (let y = 0; y < H; y += 50) ctx.fillRect(0, y, W, 25);
+
+  // ── Marcações do campo (top-view) ──
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,100,30,0.09)'; ctx.lineWidth = 2;
+  // Linha do meio
+  ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+  // Círculo central
+  ctx.beginPath(); ctx.arc(W/2, H/2, H*0.125, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = 'rgba(0,100,30,0.12)';
+  ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.fill();
+  // Área de penalti superior
+  ctx.strokeStyle = 'rgba(0,100,30,0.08)';
+  ctx.strokeRect(W*0.2, 0, W*0.6, H*0.13);
+  ctx.strokeRect(W*0.35, 0, W*0.3, H*0.055);
+  // Área de penalti inferior
+  ctx.strokeRect(W*0.2, H*0.87, W*0.6, H*0.13);
+  ctx.strokeRect(W*0.35, H*0.945, W*0.3, H*0.055);
+  // Ponto de penalti
+  ctx.fillStyle = 'rgba(0,100,30,0.12)';
+  ctx.beginPath(); ctx.arc(W/2, H*0.10, 3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W/2, H*0.90, 3, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // ── Gol no topo (visão lateral) ── bola entrando
+  const gX = W*0.21, gW = W*0.58, gH = H*0.075;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,60,20,0.28)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(gX, 0);   ctx.lineTo(gX, gH);   ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(gX+gW, 0); ctx.lineTo(gX+gW, gH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(gX, gH);  ctx.lineTo(gX+gW, gH); ctx.stroke();
+  // rede
+  ctx.strokeStyle = 'rgba(0,80,20,0.12)'; ctx.lineWidth = 0.7;
+  for (let x = gX; x < gX+gW+gH; x += 10) {
+    ctx.beginPath(); ctx.moveTo(x, 0);    ctx.lineTo(x-gH, gH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, 0);    ctx.lineTo(x+gH, gH); ctx.stroke();
+  }
+  // bola no gol (deslocada à direita)
+  const bx = gX + gW*0.72, by = gH*0.65, br = gH*0.44;
+  ctx.strokeStyle = 'rgba(0,80,20,0.22)'; ctx.lineWidth = 1.5;
+  ctx.fillStyle = 'rgba(240,240,240,0.70)';
+  ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  // rastro
+  ctx.setLineDash([4,4]); ctx.strokeStyle = 'rgba(0,80,20,0.10)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(gX+gW, H*0.02); ctx.lineTo(bx, by); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // ── Função bola de futebol ──
+  function ball(cx, cy, r, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(0,80,20,1)'; ctx.lineWidth = r*0.03;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+    // pentágono central
+    const pR = r*0.33;
+    ctx.beginPath();
+    for(let i=0;i<5;i++){const a=-Math.PI/2+i*Math.PI*2/5; ctx[i?'lineTo':'moveTo'](cx+Math.cos(a)*pR, cy+Math.sin(a)*pR);}
+    ctx.closePath(); ctx.stroke();
+    // linhas das costas
+    for(let i=0;i<5;i++){
+      const a=-Math.PI/2+i*Math.PI*2/5;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*pR, cy+Math.sin(a)*pR);
+      ctx.lineTo(cx+Math.cos(a)*r*0.92, cy+Math.sin(a)*r*0.92);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Bola grande direita
+  ball(W*0.94, H*0.37, H*0.086, 0.10);
+  // Bola pequena esquerda/baixo
+  ball(W*0.06, H*0.89, H*0.044, 0.09);
+
+  // ── Jogador 1: chutando (esquerda) ──
+  function drawPlayer(cx, cy, scale, alpha, flip) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy); ctx.scale(flip ? -1 : 1, 1);
+    const s = scale; const c = 'rgba(0,70,20,1)';
+    ctx.fillStyle = c; ctx.strokeStyle = c; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(0, -50*s, 10*s, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, -28*s, 8*s, 13*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.lineWidth = 6*s;
+    const ln = (x1,y1,x2,y2) => {ctx.beginPath();ctx.moveTo(x1*s,y1*s);ctx.lineTo(x2*s,y2*s);ctx.stroke();};
+    ln(-6,-34,-22,-45); ln(6,-33,20,-24);
+    ln(-3,-14,-4,8); ln(-4,8,-2,22);
+    ln(3,-14,22,-18); ln(22,-18,36,-8);
+    ctx.restore();
+  }
+  drawPlayer(W*0.07, H*0.46, H/720, 0.11, false);
+  drawPlayer(W*0.93, H*0.67, H/720, 0.10, true);
+
+  // ── Goleiro mergulhando (inferior esq) ──
+  ctx.save(); ctx.globalAlpha = 0.09;
+  ctx.translate(W*0.10, H*0.84); ctx.rotate(-0.44);
+  const gs = H/720, gc = 'rgba(0,70,20,1)';
+  ctx.fillStyle = gc; ctx.strokeStyle = gc; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(-22*gs,-8*gs,10*gs,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0,4*gs,18*gs,8*gs,0,0,Math.PI*2); ctx.fill();
+  ctx.lineWidth = 6*gs;
+  [[14,-2,34,-12],[14,4,34,12],[-12,10,-24,26],[-6,12,2,28]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1*gs,y1*gs);ctx.lineTo(x2*gs,y2*gs);ctx.stroke();
+  });
+  ctx.restore();
+
+  // ── Faixa Brasil lateral esquerda ──
+  ctx.fillStyle = 'rgba(0,122,47,0.55)'; ctx.fillRect(0, 0,     6, H/3);
+  ctx.fillStyle = 'rgba(184,106,0,0.55)'; ctx.fillRect(0, H/3,  6, H/3);
+  ctx.fillStyle = 'rgba(0,39,118,0.55)';  ctx.fillRect(0, H*2/3,6, H/3);
+}
+
 // Preloaded avatar images for canvas rendering
 const avatarImages = {};
 async function preloadAvatars() {
@@ -616,42 +919,35 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
   const BAR_W    = W - BAR_LEFT - RIGHT_PAD - (FONT_SZ * 3.5);
   const RADIUS   = BAR_H / 2;
 
-  // Background
-  ctx.fillStyle = '#080D1B';
-  ctx.fillRect(0, 0, W, H);
+  // Fundo decorativo
+  drawBackground(ctx, W, H);
 
-  // Grid
-  ctx.strokeStyle = 'rgba(245,197,24,0.025)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 60) { ctx.beginPath(); ctx.moveTo(x,.5); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y = 0; y < H; y += 60) { ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Header — título (esquerda)
-  ctx.fillStyle = '#EAEEF8';
+  // Header — título (esquerda) — tema claro
+  ctx.fillStyle = '#0D2010';
   ctx.font = 'bold 38px "Barlow Condensed", sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
   ctx.fillText('⚽ BOLÃO DA ', LEFT_PAD, HEADER_H/2);
   const w1 = ctx.measureText('⚽ BOLÃO DA ').width;
-  ctx.fillStyle = '#F5C518';
+  ctx.fillStyle = '#B86A00';
   ctx.fillText('COPA 2026', LEFT_PAD + w1, HEADER_H/2);
-  ctx.fillStyle = '#5A6A8A';
+  ctx.fillStyle = '#3A5A3A';
   ctx.font = '500 13px Inter, sans-serif';
   ctx.fillText('CLASSIFICAÇÃO DIA A DIA', LEFT_PAD, HEADER_H - 14);
 
   // Header — data (direita)
   const { day: d, month: m, year: y } = parseDate(day.date);
   ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#F5C518';
+  ctx.fillStyle = '#B86A00';
   ctx.font = 'bold 32px "Barlow Condensed", sans-serif';
   const dStr = d + ' ';
   const dW = ctx.measureText(dStr).width;
   ctx.fillText(dStr, W - RIGHT_PAD, HEADER_H/2);
-  ctx.fillStyle = '#EAEEF8';
+  ctx.fillStyle = '#0D2010';
   ctx.font = 'bold 18px "Barlow Condensed", sans-serif';
   const mStr = m + ' ';
   const mW = ctx.measureText(mStr).width;
   ctx.fillText(mStr, W - RIGHT_PAD - dW, HEADER_H/2);
-  ctx.fillStyle = '#5A6A8A';
+  ctx.fillStyle = '#3A5A3A';
   ctx.font = 'bold 14px "Barlow Condensed", sans-serif';
   ctx.fillText(y, W - RIGHT_PAD - dW - mW, HEADER_H/2);
 
@@ -673,7 +969,7 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
     const barTopY = targetY - BAR_H/2;
 
     // Rank
-    ctx.fillStyle = '#5A6A8A';
+    ctx.fillStyle = '#3A5A3A';
     ctx.font = `bold ${FONT_SZ}px "JetBrains Mono", monospace`;
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
     ctx.fillText(e.position, LEFT_PAD + 26, targetY);
@@ -696,7 +992,7 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
     ctx.restore();
 
     // Bar track
-    ctx.fillStyle = '#141C30';
+    ctx.fillStyle = 'rgba(0,90,20,0.09)';
     roundRect(ctx, BAR_LEFT, barTopY, BAR_W, BAR_H, RADIUS);
 
     // Bar fill
@@ -716,14 +1012,14 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
     ctx.shadowBlur = 0;
 
     // Points
-    ctx.fillStyle = '#EAEEF8';
+    ctx.fillStyle = '#0D2010';
     ctx.font = `bold ${FONT_SZ}px "JetBrains Mono", monospace`;
     ctx.textAlign = 'left';
     ctx.fillText(pts, BAR_LEFT + BAR_W + 8, targetY);
   });
 
   // Source (rodapé)
-  ctx.fillStyle = '#5A6A8A';
+  ctx.fillStyle = '#3A5A3A';
   ctx.font = '13px Inter, sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
   ctx.fillText('Fonte: WebBolão', LEFT_PAD, H - 12);
@@ -767,7 +1063,7 @@ async function exportVideo() {
     : 'video/webm';
 
   const stream = canvas.captureStream(VIDEO_FPS);
-  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6_000_000 });
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 25_000_000 });
   const chunks = [];
   recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
