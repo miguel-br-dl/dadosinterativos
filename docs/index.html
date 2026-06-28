@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bolão da Copa 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,16 +28,27 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100vh;
-  overflow: hidden;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 12px 0;
   font-family: 'Inter', sans-serif;
+}
+
+/* ── Wrapper app (frame + controles juntos) ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 90vw;
+  max-width: 100vw;
+}
+@media (min-width: 900px) {
+  #app { width: 25vw; min-width: 380px; }
 }
 
 /* ── Frame ── */
 #frame {
   flex-shrink: 0;
-  width: 25vw;
-  min-width: 380px;
+  width: 100%;
   background: var(--bg);
   position: relative;
   overflow: hidden;
@@ -149,8 +161,7 @@ body {
   border-radius: 0 22px 22px 0;
   margin-left: -6px;
   position: relative;
-  overflow: hidden;
-  background: rgba(5,22,10,0.85);
+  overflow: hidden;  
   border: 1px solid rgba(0,156,59,.12);
 }
 
@@ -249,9 +260,7 @@ body {
   border-top: none;
   padding: 8px 20px;
   flex-shrink: 0;
-  margin-top: auto;
-  width: 25vw;
-  min-width: 380px;
+  width: 100%;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 16px rgba(0,0,0,.08);
 }
@@ -329,6 +338,7 @@ body {
 </head>
 <body>
 
+<div id="app">
 <div id="frame">
 
   <!-- ══ Decoração estática de fundo ══ -->
@@ -497,9 +507,9 @@ body {
   <select id="sel-topn">
     <option value="5">5</option>
     <option value="10">10</option>
-    <option value="15" selected>15</option>
+    <option value="15" >15</option>
     <option value="20">20</option>
-    <option value="27">Todos</option>
+    <option value="27" selected>Todos</option>
   </select>
 
   <div class="ctrl-sep"></div>
@@ -515,6 +525,7 @@ body {
     <div id="progress-fill"></div>
   </div>
 </div>
+</div><!-- #app -->
 
 <script>
 // ── Paleta ──
@@ -574,7 +585,7 @@ function parseDate(iso) {
 // ── State ──
 let data = null;
 let currentDay = 0;
-let topN = 15;
+let topN = 27;
 let playing = false;
 let playTimer = null;
 const SPEEDS = [1, 1.5, 2, 3];
@@ -595,6 +606,9 @@ function render(dayIdx, animate) {
   const day = data.days[dayIdx];
   const entries = day.entries.slice(0, topN);
   const maxPts = Math.max(...entries.map(e => e.points), 1);
+  const minPts = Math.min(...entries.map(e => e.points));
+  const ptsRange = maxPts - minPts || 1;
+  const BAR_BASE = 0.25;
 
   // Update CSS transition speed
   document.documentElement.style.setProperty('--trans', animate ? '800ms' : '0ms');
@@ -679,7 +693,8 @@ function render(dayIdx, animate) {
     if (e.avatar && imgEl && imgEl.src !== location.origin + '/' + e.avatar) imgEl.src = e.avatar;
 
     // Bar fill width
-    row.querySelector('.bar-fill').style.width = Math.max((e.points / maxPts) * 100, 0.4) + '%';
+    const barPct = BAR_BASE + (e.points - minPts) / ptsRange * (1 - BAR_BASE);
+    row.querySelector('.bar-fill').style.width = (barPct * 100).toFixed(1) + '%';
 
     // Points & rank
     row.querySelector('.bar-pts').textContent = e.points;
@@ -904,7 +919,10 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
   const W = VIDEO_W, H = VIDEO_H;
   const day = data.days[dayIdx];
   const entries = day.entries.slice(0, topN);
-  const maxPts = Math.max(...entries.map(e => e.points), 1);
+  const maxPts  = Math.max(...entries.map(e => e.points), 1);
+  const minPtsV = Math.min(...entries.map(e => e.points));
+  const rangeV  = maxPts - minPtsV || 1;
+  const BAR_BASE_V = 0.25;
 
   const HEADER_H = 90;
   const FOOTER_H = 80;
@@ -996,7 +1014,7 @@ function drawFrame(ctx, dayIdx, t, prevMap) {
     roundRect(ctx, BAR_LEFT, barTopY, BAR_W, BAR_H, RADIUS);
 
     // Bar fill
-    const fillW = Math.max((pts / maxPts) * BAR_W, 4);
+    const fillW = (BAR_BASE_V + (pts - minPtsV) / rangeV * (1 - BAR_BASE_V)) * BAR_W;
     const grad = ctx.createLinearGradient(BAR_LEFT, 0, BAR_LEFT + fillW, 0);
     grad.addColorStop(0, hexRgba(color, .9));
     grad.addColorStop(1, hexRgba(color, .6));
