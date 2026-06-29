@@ -4090,7 +4090,7 @@
           "name": "Leôspa",
           "full_name": "Leonardo Toledo",
           "position": 14,
-          "points": 266,
+          "points": 267,
           "avatar": "avatars/66979.jpg"
         },
         {
@@ -4098,7 +4098,7 @@
           "name": "Zilei",
           "full_name": "Zilei Carolina Da Silveira De Lara",
           "position": 15,
-          "points": 266,
+          "points": 267,
           "avatar": "avatars/89731.png"
         },
         {
@@ -4106,7 +4106,7 @@
           "name": "Daniel",
           "full_name": "Daniel Ferreira",
           "position": 16,
-          "points": 257,
+          "points": 258,
           "avatar": "avatars/107136.png"
         },
         {
@@ -4122,7 +4122,7 @@
           "name": "Pablo",
           "full_name": "Pablo Damasceno Rattes",
           "position": 18,
-          "points": 252,
+          "points": 253,
           "avatar": ""
         },
         {
@@ -4130,7 +4130,7 @@
           "name": "Sandro",
           "full_name": "Sandro Brondani",
           "position": 19,
-          "points": 251,
+          "points": 252,
           "avatar": "avatars/106417.png"
         },
         {
@@ -4150,20 +4150,20 @@
           "avatar": "avatars/66994.jpg"
         },
         {
-          "user_id": "107312",
-          "name": "Fernando",
-          "full_name": "Fernando Prestes",
-          "position": 22,
-          "points": 235,
-          "avatar": "avatars/107312.png"
-        },
-        {
           "user_id": "106568",
           "name": "Caiut",
           "full_name": "Fabio Caiut",
+          "position": 22,
+          "points": 236,
+          "avatar": ""
+        },
+        {
+          "user_id": "107312",
+          "name": "Fernando",
+          "full_name": "Fernando Prestes",
           "position": 23,
           "points": 235,
-          "avatar": ""
+          "avatar": "avatars/107312.png"
         },
         {
           "user_id": "107318",
@@ -4194,7 +4194,7 @@
           "name": "Marcio",
           "full_name": "Marcio Passos",
           "position": 27,
-          "points": 204,
+          "points": 205,
           "avatar": ""
         }
       ]
