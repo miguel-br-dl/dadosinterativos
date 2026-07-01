@@ -1,0 +1,762 @@
+const bgMusic = document.getElementById('bg-music');
+let ytMuted = false;
+
+function ytPlay()  { if (!ytMuted) bgMusic.play().catch(() => {}); }
+function ytPause() { bgMusic.pause(); }
+function ytToggleMute() {
+  ytMuted = !ytMuted;
+  document.getElementById('btn-mute').textContent = ytMuted ? '🔇' : '🔊';
+  if (ytMuted) { bgMusic.pause(); } else if (playing) { bgMusic.play().catch(() => {}); }
+}
+
+// ── Paleta ──
+// Paleta: cores dos times nacionais da América Latina (CONMEBOL + CONCACAF)
+const PALETTE = [
+  '#009C3B', // Brasil — verde
+  '#7EC8E3', // Argentina — celeste
+  '#CC0001', // Chile — vermelho
+  '#FCD116', // Colômbia — amarelo
+  '#003087', // Colômbia — azul
+  '#006847', // México — verde
+  '#0066AA', // Uruguai — azul celeste
+  '#D52B1E', // Bolívia — vermelho
+  '#0073CF', // Honduras — azul
+  '#EF3340', // Equador — vermelho
+  '#CF142B', // Cuba — vermelho
+  '#002B7F', // Costa Rica — azul
+  '#B22234', // EUA — vermelho
+  '#009B3A', // Jamaica — verde
+  '#D4961C', // Jamaica — dourado
+  '#3C3B6E', // EUA — azul marinho
+  '#0F47AF', // El Salvador — azul
+  '#CE1126', // Peru — vermelho
+  '#DA121A', // Panamá — vermelho
+  '#00209F', // Haiti — azul
+  '#002A8F', // Paraguai — azul
+  '#CF9E0C', // Venezuela — dourado
+  '#5B2D8E', // Caribe — roxo
+  '#006666', // Suriname — verde-azul
+  '#8B0000', // Trinidad — vinho
+  '#005A9C', // Guatemala — azul médio
+  '#C0392B', // Venezuela — vermelho
+];
+
+function colorForId(id) {
+  let h = 0;
+  for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff;
+  return PALETTE[Math.abs(h) % PALETTE.length];
+}
+
+function hexRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function initials(name) {
+  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+const MONTHS = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+function parseDate(iso) {
+  const [y,m,d] = iso.split('-');
+  return { day: d, month: MONTHS[parseInt(m)-1], year: y };
+}
+
+// ── Sub-frame interpolation ──
+const SUBSTEPS = 5;
+
+function buildFrames(days) {
+  const frames = [];
+  frames.push({ ...days[0], _sub: false, _dayIdx: 0 });
+
+  for (let d = 1; d < days.length; d++) {
+    const prev = days[d - 1];
+    const next = days[d];
+    const prevPts = {};
+    prev.entries.forEach(e => prevPts[e.user_id] = e.points);
+
+    for (let s = 1; s <= SUBSTEPS; s++) {
+      const t = s / SUBSTEPS;
+      const interp = next.entries.map(e => {
+        const p0 = prevPts[e.user_id] ?? e.points;
+        return { ...e, points: Math.round(p0 + (e.points - p0) * t) };
+      });
+      interp.sort((a, b) => b.points - a.points);
+      interp.forEach((e, i) => { e.position = i + 1; });
+      frames.push({ date: next.date, entries: interp, _sub: s < SUBSTEPS, _dayIdx: d });
+    }
+  }
+  return frames;
+}
+
+// ── State ──
+let data = null;
+let frames = [];
+let currentDay = 0;
+let topN = 27;
+let playing = false;
+let playTimer = null;
+const SPEEDS = [1, 1.5, 2, 3];
+let speedIdx = 1;
+
+const chart = document.getElementById('chart');
+const rows = {};  // userId → DOM row
+
+// ── Sizing (fixo, proporcional ao avatar) ──
+const AVATAR_D  = 28;   // diâmetro do avatar
+const ROW_H     = AVATAR_D + 10;  // 38px
+const BAR_H     = AVATAR_D;       // barra = altura do avatar
+const FONT_SIZE = 12;
+const PAD_TOP   = 8;   // espaço antes da primeira linha
+
+// ── Render ──
+function render(dayIdx, animate) {
+  const day = frames[dayIdx];
+  const entries = day.entries.slice(0, topN);
+  const maxPts = Math.max(...entries.map(e => e.points), 1);
+  const minPts = Math.min(...entries.map(e => e.points));
+  const ptsRange = maxPts - minPts || 1;
+  const BAR_BASE = 0.25;
+
+  document.documentElement.style.setProperty('--trans', animate ? '600ms' : '0ms');
+
+  // Chart height = exact content
+  chart.style.height = (PAD_TOP + entries.length * ROW_H + 8) + 'px';
+
+  // Create missing rows
+  for (const e of entries) {
+    if (rows[e.user_id]) continue;
+    const color = colorForId(e.user_id);
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.dataset.uid = e.user_id;
+
+    row.style.height = ROW_H + 'px';
+
+    // Rank
+    const rankEl = document.createElement('div');
+    rankEl.className = 'rank-num';
+    row.appendChild(rankEl);
+
+    // Avatar
+    const wrap = document.createElement('div');
+    wrap.className = 'avatar-wrap';
+    wrap.style.width = wrap.style.height = AVATAR_D + 'px';
+
+    const ini = document.createElement('div');
+    ini.className = 'avatar-initials';
+    ini.style.cssText = `background:${color};width:${AVATAR_D}px;height:${AVATAR_D}px;font-size:${(AVATAR_D*0.36).toFixed(0)}px`;
+    ini.textContent = initials(e.name);
+    wrap.appendChild(ini);
+
+    const img = document.createElement('img');
+    img.alt = e.name;
+    img.style.cssText = `display:none;width:${AVATAR_D}px;height:${AVATAR_D}px`;
+    img.onload  = () => { img.style.display = ''; ini.style.display = 'none'; };
+    img.onerror = () => { img.style.display = 'none'; ini.style.display = ''; };
+    if (e.avatar) img.src = e.avatar;
+    wrap.appendChild(img);
+    row.appendChild(wrap);
+
+    // Bar track
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    track.style.height = BAR_H + 'px';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    fill.style.background = `linear-gradient(90deg,${hexRgba(color,.9)},${hexRgba(color,.6)})`;
+    const nameEl = document.createElement('div');
+    nameEl.className = 'bar-name';
+    nameEl.style.cssText += `left:${(AVATAR_D*0.4).toFixed(0)}px;font-size:${FONT_SIZE}px`;
+    nameEl.textContent = e.name;
+    track.appendChild(fill);
+    track.appendChild(nameEl);
+    row.appendChild(track);
+
+    // Points
+    const ptsEl = document.createElement('div');
+    ptsEl.className = 'bar-pts';
+    ptsEl.style.cssText = `font-size:${FONT_SIZE}px;width:${(FONT_SIZE*3.2).toFixed(0)}px`;
+    row.appendChild(ptsEl);
+
+    chart.appendChild(row);
+    rows[e.user_id] = row;
+  }
+
+  // Hide rows outside topN
+  for (const [uid, row] of Object.entries(rows)) {
+    row.style.visibility = entries.some(e => e.user_id === uid) ? '' : 'hidden';
+  }
+
+  // Update each row
+  entries.forEach((e, i) => {
+    const row = rows[e.user_id];
+    if (!row) return;
+
+    row.style.top = PAD_TOP + i * ROW_H + 'px';
+
+    // Avatar src update
+    const imgEl = row.querySelector('.avatar-wrap img');
+    if (e.avatar && imgEl && imgEl.src !== location.origin + '/' + e.avatar) imgEl.src = e.avatar;
+
+    // Bar fill width
+    const barPct = BAR_BASE + (e.points - minPts) / ptsRange * (1 - BAR_BASE);
+    row.querySelector('.bar-fill').style.width = (barPct * 100).toFixed(1) + '%';
+
+    // Points & rank
+    row.querySelector('.bar-pts').textContent = e.points;
+    row.querySelector('.rank-num').textContent = e.position;
+  });
+
+  // Date
+  const { day: d, month: m, year: y } = parseDate(day.date);
+  document.getElementById('date-day').textContent = d;
+  document.getElementById('date-month').textContent = m;
+  document.getElementById('date-year').textContent = y;
+  // Scale date font to frame size
+
+  document.getElementById('day-indicator').textContent =
+    `${day._dayIdx + 1}/${data.days.length}`;
+}
+
+// ── Playback ──
+function syncPlayButtons(isPlaying) {
+  const icon = isPlaying ? 'fa-pause' : 'fa-play';
+  document.getElementById('btn-play').innerHTML     = `<i class="fa-solid ${icon}"></i> ${isPlaying ? 'Pausar' : 'Play'}`;
+  document.getElementById('btn-play-top').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+}
+
+function pause() {
+  playing = false;
+  clearTimeout(playTimer);
+  syncPlayButtons(false);
+  ytPause();
+}
+
+function play() {
+  playing = true;
+  syncPlayButtons(true);
+  ytPlay();
+  step();
+}
+
+function step() {
+  if (!playing) return;
+  if (currentDay >= frames.length - 1) { pause(); updateNavButtons(); return; }
+  currentDay++;
+  render(currentDay, true);
+  const speed = SPEEDS[speedIdx];
+  const isSub = frames[currentDay]._sub;
+  const delay = isSub ? 220 / speed : (600 + 500) / speed;
+  playTimer = setTimeout(step, delay);
+}
+
+// ── Navegação ──
+function goFirst() {
+  pause(); currentDay = 0; render(0, false); updateNavButtons();
+}
+function goLast() {
+  pause(); currentDay = frames.length - 1; render(currentDay, false); updateNavButtons();
+}
+function goPrev() {
+  pause();
+  const targetDay = frames[currentDay]._dayIdx - 1;
+  if (targetDay < 0) return;
+  let idx = currentDay - 1;
+  while (idx > 0 && frames[idx]._dayIdx > targetDay) idx--;
+  currentDay = idx;
+  render(currentDay, true); updateNavButtons();
+}
+function goNext() {
+  pause();
+  const targetDay = frames[currentDay]._dayIdx + 1;
+  if (targetDay >= data.days.length) return;
+  let idx = currentDay + 1;
+  while (idx < frames.length - 1 && frames[idx]._dayIdx < targetDay) idx++;
+  while (idx < frames.length - 1 && frames[idx]._sub) idx++;
+  currentDay = idx;
+  render(currentDay, true); updateNavButtons();
+}
+
+function updateNavButtons() {
+  const atStart = frames[currentDay]._dayIdx === 0;
+  const atEnd   = frames[currentDay]._dayIdx === data.days.length - 1;
+  ['btn-first','btn-first-top','btn-prev','btn-prev-top'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = atStart;
+  });
+  ['btn-last','btn-last-top','btn-next','btn-next-top'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = atEnd;
+  });
+}
+
+// ── Controls ──
+document.getElementById('btn-play').addEventListener('click',     () => { if (playing) pause(); else play(); });
+document.getElementById('btn-play-top').addEventListener('click', () => { if (playing) pause(); else play(); });
+document.getElementById('btn-first').addEventListener('click',     goFirst);
+document.getElementById('btn-first-top').addEventListener('click', goFirst);
+document.getElementById('btn-prev').addEventListener('click',      goPrev);
+document.getElementById('btn-prev-top').addEventListener('click',  goPrev);
+document.getElementById('btn-next').addEventListener('click',      goNext);
+document.getElementById('btn-next-top').addEventListener('click',  goNext);
+document.getElementById('btn-last').addEventListener('click',      goLast);
+document.getElementById('btn-last-top').addEventListener('click',  goLast);
+
+document.getElementById('btn-mute').addEventListener('click', ytToggleMute);
+document.getElementById('btn-speed').addEventListener('click', () => {
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  document.getElementById('btn-speed').textContent = SPEEDS[speedIdx] + '×';
+});
+document.getElementById('sel-topn').addEventListener('change', e => {
+  topN = parseInt(e.target.value);
+  render(currentDay, false);
+});
+
+// ── Snapshot PNG ──
+document.getElementById('btn-snapshot').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-snapshot');
+  btn.disabled = true; btn.textContent = '⏳ Gerando...';
+  try {
+    const canvas = await html2canvas(document.getElementById('frame'), {
+      scale: 1, useCORS: true, backgroundColor: '#080D1B',
+    });
+    const a = document.createElement('a');
+    const { day, month, year } = parseDate(frames[currentDay].date);
+    a.download = `bolao-${year}-${frames[currentDay].date.slice(5,7)}-${day}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } finally {
+    btn.disabled = false; btn.textContent = '📷 Foto';
+  }
+});
+
+// ── Video Export (canvas renderer, 16:9) ──
+const VIDEO_W = 1280, VIDEO_H = 720;
+const VIDEO_FPS = 30;
+const TRANS_SECS = 1.0;
+const HOLD_SECS  = 0.6;
+const FIELD_BG_SRC = 'assets/copa-2026-bg.png';
+const fieldBgImage = new Image();
+fieldBgImage.src = FIELD_BG_SRC;
+
+function easeInOut(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
+
+function drawCoverImage(ctx, img, x, y, w, h) {
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+  const sw = w / scale;
+  const sh = h / scale;
+  const sx = (img.naturalWidth - sw) / 2;
+  const sy = Math.max(0, (img.naturalHeight - sh) * 0.18);
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function preloadFieldBackground() {
+  if (fieldBgImage.complete && fieldBgImage.naturalWidth) return Promise.resolve();
+  return new Promise(resolve => {
+    fieldBgImage.onload = resolve;
+    fieldBgImage.onerror = resolve;
+  });
+}
+
+// ── Fundo decorativo no canvas — tema claro ──
+function drawBackground(ctx, W, H) {
+  if (fieldBgImage.complete && fieldBgImage.naturalWidth) {
+    drawCoverImage(ctx, fieldBgImage, 0, 0, W, H);
+
+    const edgeGrad = ctx.createLinearGradient(0, 0, W, 0);
+    edgeGrad.addColorStop(0, 'rgba(239,247,238,.74)');
+    edgeGrad.addColorStop(.16, 'rgba(239,247,238,.36)');
+    edgeGrad.addColorStop(.84, 'rgba(239,247,238,.34)');
+    edgeGrad.addColorStop(1, 'rgba(239,247,238,.78)');
+    ctx.fillStyle = edgeGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    const softGrad = ctx.createLinearGradient(0, 0, 0, H);
+    softGrad.addColorStop(0, 'rgba(239,247,238,.42)');
+    softGrad.addColorStop(.32, 'rgba(239,247,238,.66)');
+    softGrad.addColorStop(1, 'rgba(239,247,238,.72)');
+    ctx.fillStyle = softGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = 'rgba(0,48,18,.08)';
+    ctx.fillRect(0, 0, W, H);
+    return;
+  }
+
+  // Base: verde-branco claro
+  ctx.fillStyle = '#EFF7EE';
+  ctx.fillRect(0, 0, W, H);
+
+  // Listras horizontais do gramado
+  ctx.fillStyle = 'rgba(0,120,40,0.05)';
+  for (let y = 0; y < H; y += 50) ctx.fillRect(0, y, W, 25);
+
+  // ── Marcações do campo (top-view) ──
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,100,30,0.09)'; ctx.lineWidth = 2;
+  // Linha do meio
+  ctx.beginPath(); ctx.moveTo(0, H/2); ctx.lineTo(W, H/2); ctx.stroke();
+  // Círculo central
+  ctx.beginPath(); ctx.arc(W/2, H/2, H*0.125, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = 'rgba(0,100,30,0.12)';
+  ctx.beginPath(); ctx.arc(W/2, H/2, 4, 0, Math.PI*2); ctx.fill();
+  // Área de penalti superior
+  ctx.strokeStyle = 'rgba(0,100,30,0.08)';
+  ctx.strokeRect(W*0.2, 0, W*0.6, H*0.13);
+  ctx.strokeRect(W*0.35, 0, W*0.3, H*0.055);
+  // Área de penalti inferior
+  ctx.strokeRect(W*0.2, H*0.87, W*0.6, H*0.13);
+  ctx.strokeRect(W*0.35, H*0.945, W*0.3, H*0.055);
+  // Ponto de penalti
+  ctx.fillStyle = 'rgba(0,100,30,0.12)';
+  ctx.beginPath(); ctx.arc(W/2, H*0.10, 3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W/2, H*0.90, 3, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // ── Gol no topo (visão lateral) ── bola entrando
+  const gX = W*0.21, gW = W*0.58, gH = H*0.075;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,60,20,0.28)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(gX, 0);   ctx.lineTo(gX, gH);   ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(gX+gW, 0); ctx.lineTo(gX+gW, gH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(gX, gH);  ctx.lineTo(gX+gW, gH); ctx.stroke();
+  // rede
+  ctx.strokeStyle = 'rgba(0,80,20,0.12)'; ctx.lineWidth = 0.7;
+  for (let x = gX; x < gX+gW+gH; x += 10) {
+    ctx.beginPath(); ctx.moveTo(x, 0);    ctx.lineTo(x-gH, gH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, 0);    ctx.lineTo(x+gH, gH); ctx.stroke();
+  }
+  // bola no gol (deslocada à direita)
+  const bx = gX + gW*0.72, by = gH*0.65, br = gH*0.44;
+  ctx.strokeStyle = 'rgba(0,80,20,0.22)'; ctx.lineWidth = 1.5;
+  ctx.fillStyle = 'rgba(240,240,240,0.70)';
+  ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  // rastro
+  ctx.setLineDash([4,4]); ctx.strokeStyle = 'rgba(0,80,20,0.10)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(gX+gW, H*0.02); ctx.lineTo(bx, by); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // ── Função bola de futebol ──
+  function ball(cx, cy, r, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.strokeStyle = 'rgba(0,80,20,1)'; ctx.lineWidth = r*0.03;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+    // pentágono central
+    const pR = r*0.33;
+    ctx.beginPath();
+    for(let i=0;i<5;i++){const a=-Math.PI/2+i*Math.PI*2/5; ctx[i?'lineTo':'moveTo'](cx+Math.cos(a)*pR, cy+Math.sin(a)*pR);}
+    ctx.closePath(); ctx.stroke();
+    // linhas das costas
+    for(let i=0;i<5;i++){
+      const a=-Math.PI/2+i*Math.PI*2/5;
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(a)*pR, cy+Math.sin(a)*pR);
+      ctx.lineTo(cx+Math.cos(a)*r*0.92, cy+Math.sin(a)*r*0.92);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Bola grande direita
+  ball(W*0.94, H*0.37, H*0.086, 0.10);
+  // Bola pequena esquerda/baixo
+  ball(W*0.06, H*0.89, H*0.044, 0.09);
+
+  // ── Jogador 1: chutando (esquerda) ──
+  function drawPlayer(cx, cy, scale, alpha, flip) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    ctx.translate(cx, cy); ctx.scale(flip ? -1 : 1, 1);
+    const s = scale; const c = 'rgba(0,70,20,1)';
+    ctx.fillStyle = c; ctx.strokeStyle = c; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(0, -50*s, 10*s, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, -28*s, 8*s, 13*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.lineWidth = 6*s;
+    const ln = (x1,y1,x2,y2) => {ctx.beginPath();ctx.moveTo(x1*s,y1*s);ctx.lineTo(x2*s,y2*s);ctx.stroke();};
+    ln(-6,-34,-22,-45); ln(6,-33,20,-24);
+    ln(-3,-14,-4,8); ln(-4,8,-2,22);
+    ln(3,-14,22,-18); ln(22,-18,36,-8);
+    ctx.restore();
+  }
+  drawPlayer(W*0.07, H*0.46, H/720, 0.11, false);
+  drawPlayer(W*0.93, H*0.67, H/720, 0.10, true);
+
+  // ── Goleiro mergulhando (inferior esq) ──
+  ctx.save(); ctx.globalAlpha = 0.09;
+  ctx.translate(W*0.10, H*0.84); ctx.rotate(-0.44);
+  const gs = H/720, gc = 'rgba(0,70,20,1)';
+  ctx.fillStyle = gc; ctx.strokeStyle = gc; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(-22*gs,-8*gs,10*gs,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0,4*gs,18*gs,8*gs,0,0,Math.PI*2); ctx.fill();
+  ctx.lineWidth = 6*gs;
+  [[14,-2,34,-12],[14,4,34,12],[-12,10,-24,26],[-6,12,2,28]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1*gs,y1*gs);ctx.lineTo(x2*gs,y2*gs);ctx.stroke();
+  });
+  ctx.restore();
+
+  // ── Faixa Brasil lateral esquerda ──
+  ctx.fillStyle = 'rgba(0,122,47,0.55)'; ctx.fillRect(0, 0,     6, H/3);
+  ctx.fillStyle = 'rgba(184,106,0,0.55)'; ctx.fillRect(0, H/3,  6, H/3);
+  ctx.fillStyle = 'rgba(0,39,118,0.55)';  ctx.fillRect(0, H*2/3,6, H/3);
+}
+
+// Preloaded avatar images for canvas rendering
+const avatarImages = {};
+async function preloadAvatars() {
+  const urls = new Set();
+  for (const day of data.days) for (const e of day.entries) if (e.avatar) urls.add(e.avatar);
+  await Promise.allSettled([...urls].map(url => new Promise(res => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => { avatarImages[url] = img; res(); };
+    img.onerror = res;
+    img.src = url;
+  })));
+}
+
+function drawFrame(ctx, dayIdx, t, prevMap) {
+  const W = VIDEO_W, H = VIDEO_H;
+  const day = data.days[dayIdx];
+  const entries = day.entries.slice(0, topN);
+  const maxPts  = Math.max(...entries.map(e => e.points), 1);
+  const minPtsV = Math.min(...entries.map(e => e.points));
+  const rangeV  = maxPts - minPtsV || 1;
+  const BAR_BASE_V = 0.25;
+
+  const HEADER_H = 90;
+  const FOOTER_H = 80;
+  const CHART_H  = H - HEADER_H - FOOTER_H;
+  const ROW_H    = CHART_H / topN;
+  const AVATAR_D = Math.min(36, ROW_H - 8);
+  const BAR_H    = Math.max(18, ROW_H - 12);
+  const FONT_SZ  = Math.max(10, Math.min(14, ROW_H * 0.28));
+  const LEFT_PAD = 50;
+  const RIGHT_PAD= 50;
+  const BAR_LEFT = LEFT_PAD + 32 + 10 + AVATAR_D + 6;
+  const BAR_W    = W - BAR_LEFT - RIGHT_PAD - (FONT_SZ * 3.5);
+  const RADIUS   = BAR_H / 2;
+
+  // Fundo decorativo
+  drawBackground(ctx, W, H);
+
+  // Header — título (esquerda) — tema claro
+  ctx.fillStyle = '#0D2010';
+  ctx.font = 'bold 38px "Barlow Condensed", sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('⚽ BOLÃO DA ', LEFT_PAD, HEADER_H/2);
+  const w1 = ctx.measureText('⚽ BOLÃO DA ').width;
+  ctx.fillStyle = '#B86A00';
+  ctx.fillText('COPA 2026', LEFT_PAD + w1, HEADER_H/2);
+  ctx.fillStyle = '#3A5A3A';
+  ctx.font = '500 13px Inter, sans-serif';
+  ctx.fillText('CLASSIFICAÇÃO DIA A DIA', LEFT_PAD, HEADER_H - 14);
+
+  // Header — data (direita)
+  const { day: d, month: m, year: y } = parseDate(day.date);
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#B86A00';
+  ctx.font = 'bold 32px "Barlow Condensed", sans-serif';
+  const dStr = d + ' ';
+  const dW = ctx.measureText(dStr).width;
+  ctx.fillText(dStr, W - RIGHT_PAD, HEADER_H/2);
+  ctx.fillStyle = '#0D2010';
+  ctx.font = 'bold 18px "Barlow Condensed", sans-serif';
+  const mStr = m + ' ';
+  const mW = ctx.measureText(mStr).width;
+  ctx.fillText(mStr, W - RIGHT_PAD - dW, HEADER_H/2);
+  ctx.fillStyle = '#3A5A3A';
+  ctx.font = 'bold 14px "Barlow Condensed", sans-serif';
+  ctx.fillText(y, W - RIGHT_PAD - dW - mW, HEADER_H/2);
+
+  // Bars
+  entries.forEach((e, i) => {
+    const color = colorForId(e.user_id);
+
+    // Interpolate y and points if transitioning
+    let targetY = HEADER_H + i * ROW_H + ROW_H/2;
+    let pts = e.points;
+    if (prevMap && t < 1) {
+      const prev = prevMap[e.user_id];
+      if (prev !== undefined) {
+        const prevY = HEADER_H + prev.rank * ROW_H + ROW_H/2;
+        targetY = prevY + (targetY - prevY) * easeInOut(t);
+        pts = Math.round(prev.points + (e.points - prev.points) * easeInOut(t));
+      }
+    }
+    const barTopY = targetY - BAR_H/2;
+
+    // Rank
+    ctx.fillStyle = '#3A5A3A';
+    ctx.font = `bold ${FONT_SZ}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(e.position, LEFT_PAD + 26, targetY);
+
+    // Avatar circle
+    const cx = LEFT_PAD + 32 + 10 + AVATAR_D/2;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, targetY, AVATAR_D/2, 0, Math.PI*2); ctx.clip();
+    const aimg = avatarImages[e.avatar];
+    if (aimg) {
+      ctx.drawImage(aimg, cx - AVATAR_D/2, targetY - AVATAR_D/2, AVATAR_D, AVATAR_D);
+    } else {
+      ctx.fillStyle = color;
+      ctx.fillRect(cx - AVATAR_D/2, targetY - AVATAR_D/2, AVATAR_D, AVATAR_D);
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${AVATAR_D * 0.36}px "Barlow Condensed", sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(initials(e.name), cx, targetY + 1);
+    }
+    ctx.restore();
+
+    // Bar track
+    ctx.fillStyle = 'rgba(0,90,20,0.09)';
+    roundRect(ctx, BAR_LEFT, barTopY, BAR_W, BAR_H, RADIUS);
+
+    // Bar fill
+    const fillW = (BAR_BASE_V + (pts - minPtsV) / rangeV * (1 - BAR_BASE_V)) * BAR_W;
+    const grad = ctx.createLinearGradient(BAR_LEFT, 0, BAR_LEFT + fillW, 0);
+    grad.addColorStop(0, hexRgba(color, .9));
+    grad.addColorStop(1, hexRgba(color, .6));
+    ctx.fillStyle = grad;
+    roundRect(ctx, BAR_LEFT, barTopY, fillW, BAR_H, RADIUS);
+
+    // Name
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.font = `600 ${FONT_SZ}px Inter, sans-serif`;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 4;
+    ctx.fillText(e.name, BAR_LEFT + AVATAR_D * 0.4, targetY);
+    ctx.shadowBlur = 0;
+
+    // Points
+    ctx.fillStyle = '#0D2010';
+    ctx.font = `bold ${FONT_SZ}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'left';
+    ctx.fillText(pts, BAR_LEFT + BAR_W + 8, targetY);
+  });
+
+  // Source (rodapé)
+  ctx.fillStyle = '#3A5A3A';
+  ctx.font = '13px Inter, sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  ctx.fillText('Fonte: WebBolão', LEFT_PAD, H - 12);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+async function exportVideo() {
+  const btn = document.getElementById('btn-record');
+  const progressBar = document.getElementById('progress-bar');
+  const progressFill = document.getElementById('progress-fill');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Preparando...';
+  btn.classList.add('recording');
+  progressBar.style.display = 'block';
+
+  await Promise.all([preloadAvatars(), preloadFieldBackground()]);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = VIDEO_W; canvas.height = VIDEO_H;
+  const ctx = canvas.getContext('2d');
+
+  const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')
+    ? 'video/mp4;codecs=avc1'
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : 'video/webm';
+
+  const stream = canvas.captureStream(VIDEO_FPS);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 25_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  recorder.onstop = () => {
+    const type = mimeType.split(';')[0];
+    const ext  = type.includes('mp4') ? 'mp4' : 'webm';
+    const blob = new Blob(chunks, { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `bolao-copa-2026.${ext}`;
+    a.click();
+    btn.disabled = false;
+    btn.textContent = '⏺ Gravar MP4';
+    btn.classList.remove('recording');
+    progressBar.style.display = 'none';
+    progressFill.style.width = '0%';
+  };
+
+  recorder.start();
+
+  const totalDays = data.days.length;
+  const transFrames = Math.round(TRANS_SECS * VIDEO_FPS);
+  const holdFrames  = Math.round(HOLD_SECS  * VIDEO_FPS);
+  const totalFrames = totalDays * (transFrames + holdFrames);
+  let framesDone = 0;
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  for (let d = 0; d < totalDays; d++) {
+    btn.textContent = `⏺ Dia ${d+1}/${totalDays}`;
+
+    // Build prevMap
+    let prevMap = null;
+    if (d > 0) {
+      prevMap = {};
+      data.days[d-1].entries.slice(0, topN).forEach((e, i) => {
+        prevMap[e.user_id] = { rank: i, points: e.points };
+      });
+    }
+
+    // Transition frames
+    for (let f = 0; f < transFrames; f++) {
+      drawFrame(ctx, d, f / transFrames, prevMap);
+      framesDone++;
+      progressFill.style.width = (framesDone / totalFrames * 100) + '%';
+      await sleep(1000 / VIDEO_FPS);
+    }
+    // Hold frames
+    for (let f = 0; f < holdFrames; f++) {
+      drawFrame(ctx, d, 1, null);
+      framesDone++;
+      progressFill.style.width = (framesDone / totalFrames * 100) + '%';
+      await sleep(1000 / VIDEO_FPS);
+    }
+  }
+
+  recorder.stop();
+}
+
+document.getElementById('btn-record').addEventListener('click', exportVideo);
+
+// ── Load ──
+fetch('data.json')
+  .then(r => r.json())
+  .then(d => {
+    data = d;
+    frames = buildFrames(data.days);
+    render(0, false);
+    updateNavButtons();
+    setTimeout(() => {
+      document.documentElement.style.setProperty('--trans', '800ms');
+    }, 100);
+  })
+  .catch(err => {
+    chart.innerHTML = `<p style="color:#F5C518;padding:40px;font-family:Inter">
+      Erro: ${err.message}<br>Sirva via HTTP: python -m http.server 8765</p>`;
+  });
