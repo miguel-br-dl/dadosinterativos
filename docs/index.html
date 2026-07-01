@@ -107,6 +107,22 @@ body {
   gap: 6px;
 }
 
+/* Mobile: título sozinho na linha 1, botões na linha 2 */
+@media (max-width: 899px) {
+  #header-top {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  .title {
+    flex: 1 1 100%;
+  }
+  #header-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 2px;
+  }
+}
+
 .title {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
@@ -551,9 +567,11 @@ body {
     <div id="header-top">
       <div class="title">⚽ BOLÃO DA <span>COPA 2026</span></div>
       <div id="header-actions">
-        <button id="btn-restart-top" aria-label="Recomeçar"><i class="fa-solid fa-backward-step"></i></button>
-        <button id="btn-play-top" aria-label="Play/Pause"><i class="fa-solid fa-play"></i></button>
-        <button id="btn-last-top" aria-label="Último dia"><i class="fa-solid fa-forward-step"></i></button>
+        <button id="btn-first-top" aria-label="Primeiro dia"><i class="fa-solid fa-angles-left"></i></button>
+        <button id="btn-prev-top"  aria-label="Dia anterior"><i class="fa-solid fa-angle-left"></i></button>
+        <button id="btn-play-top"  aria-label="Play/Pause"><i class="fa-solid fa-play"></i></button>
+        <button id="btn-next-top"  aria-label="Próximo dia"><i class="fa-solid fa-angle-right"></i></button>
+        <button id="btn-last-top"  aria-label="Último dia"><i class="fa-solid fa-angles-right"></i></button>
       </div>
     </div>
     <div id="header-sub-row">
@@ -571,9 +589,11 @@ body {
 </div>
 
 <div id="controls">
-  <button id="btn-prev"><i class="fa-solid fa-backward-step"></i></button>
+  <button id="btn-first"><i class="fa-solid fa-angles-left"></i></button>
+  <button id="btn-prev"><i class="fa-solid fa-angle-left"></i></button>
   <button id="btn-play"><i class="fa-solid fa-play"></i> Play</button>
-  <button id="btn-next"><i class="fa-solid fa-forward-step"></i></button>
+  <button id="btn-next"><i class="fa-solid fa-angle-right"></i></button>
+  <button id="btn-last"><i class="fa-solid fa-angles-right"></i></button>
   <span class="ctrl-label" id="day-indicator">1/18</span>
 
   <div class="ctrl-sep"></div>
@@ -856,7 +876,7 @@ function play() {
 
 function step() {
   if (!playing) return;
-  if (currentDay >= frames.length - 1) { pause(); return; }
+  if (currentDay >= frames.length - 1) { pause(); updateNavButtons(); return; }
   currentDay++;
   render(currentDay, true);
   const speed = SPEEDS[speedIdx];
@@ -865,45 +885,58 @@ function step() {
   playTimer = setTimeout(step, delay);
 }
 
-// ── Controls ──
-document.getElementById('btn-play').addEventListener('click', () => {
-  if (playing) pause(); else play();
-});
-document.getElementById('btn-prev').addEventListener('click', () => {
+// ── Navegação ──
+function goFirst() {
+  pause(); currentDay = 0; render(0, false); updateNavButtons();
+}
+function goLast() {
+  pause(); currentDay = frames.length - 1; render(currentDay, false); updateNavButtons();
+}
+function goPrev() {
   pause();
   const targetDay = frames[currentDay]._dayIdx - 1;
   if (targetDay < 0) return;
-  // Encontra o último frame do dia anterior (o não-sub)
   let idx = currentDay - 1;
   while (idx > 0 && frames[idx]._dayIdx > targetDay) idx--;
   currentDay = idx;
-  render(currentDay, true);
-});
-document.getElementById('btn-next').addEventListener('click', () => {
+  render(currentDay, true); updateNavButtons();
+}
+function goNext() {
   pause();
   const targetDay = frames[currentDay]._dayIdx + 1;
   if (targetDay >= data.days.length) return;
-  // Encontra o último sub-frame (= o frame real) do próximo dia
   let idx = currentDay + 1;
   while (idx < frames.length - 1 && frames[idx]._dayIdx < targetDay) idx++;
-  // Garante que chegamos no frame real (não sub)
   while (idx < frames.length - 1 && frames[idx]._sub) idx++;
   currentDay = idx;
-  render(currentDay, true);
-});
-document.getElementById('btn-play-top').addEventListener('click', () => {
-  if (playing) pause(); else play();
-});
-document.getElementById('btn-restart-top').addEventListener('click', () => {
-  pause();
-  currentDay = 0;
-  render(0, false);
-});
-document.getElementById('btn-last-top').addEventListener('click', () => {
-  pause();
-  currentDay = frames.length - 1;
-  render(currentDay, false);
-});
+  render(currentDay, true); updateNavButtons();
+}
+
+function updateNavButtons() {
+  const atStart = frames[currentDay]._dayIdx === 0;
+  const atEnd   = frames[currentDay]._dayIdx === data.days.length - 1;
+  ['btn-first','btn-first-top','btn-prev','btn-prev-top'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = atStart;
+  });
+  ['btn-last','btn-last-top','btn-next','btn-next-top'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = atEnd;
+  });
+}
+
+// ── Controls ──
+document.getElementById('btn-play').addEventListener('click',     () => { if (playing) pause(); else play(); });
+document.getElementById('btn-play-top').addEventListener('click', () => { if (playing) pause(); else play(); });
+document.getElementById('btn-first').addEventListener('click',     goFirst);
+document.getElementById('btn-first-top').addEventListener('click', goFirst);
+document.getElementById('btn-prev').addEventListener('click',      goPrev);
+document.getElementById('btn-prev-top').addEventListener('click',  goPrev);
+document.getElementById('btn-next').addEventListener('click',      goNext);
+document.getElementById('btn-next-top').addEventListener('click',  goNext);
+document.getElementById('btn-last').addEventListener('click',      goLast);
+document.getElementById('btn-last-top').addEventListener('click',  goLast);
+
 document.getElementById('btn-mute').addEventListener('click', ytToggleMute);
 document.getElementById('btn-speed').addEventListener('click', () => {
   speedIdx = (speedIdx + 1) % SPEEDS.length;
@@ -1308,6 +1341,7 @@ fetch('data.json')
     data = d;
     frames = buildFrames(data.days);
     render(0, false);
+    updateNavButtons();
     setTimeout(() => {
       document.documentElement.style.setProperty('--trans', '800ms');
     }, 100);
