@@ -43,10 +43,13 @@
   --br-green: #007A2F;
   --br-yellow:#B86A00;
   --br-blue:  #002776;
+  --field-bg: url('assets/copa-2026-bg.png');
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.58), rgba(239,247,238,.86) 38%, #dcebd8 100%),
+    #dcebd8;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,7 +74,7 @@ body {
 #frame {
   flex-shrink: 0;
   width: 100%;
-  background: var(--bg);
+  background: #e8f4e6;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -87,6 +90,34 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  background-image: var(--field-bg);
+  background-size: cover;
+  background-position: center top;
+  opacity: .95;
+}
+
+#bg-deco > svg {
+  display: none;
+}
+
+#bg-deco::before,
+#bg-deco::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+#bg-deco::before {
+  background:
+    linear-gradient(90deg, rgba(239,247,238,.74) 0%, rgba(239,247,238,.36) 16%, rgba(239,247,238,.34) 84%, rgba(239,247,238,.78) 100%),
+    linear-gradient(180deg, rgba(239,247,238,.42) 0%, rgba(239,247,238,.66) 32%, rgba(239,247,238,.72) 100%);
+}
+
+#bg-deco::after {
+  background:
+    radial-gradient(circle at 76% 9%, rgba(255,255,255,.18), transparent 24%),
+    linear-gradient(180deg, rgba(0,48,18,.05), rgba(0,48,18,.16));
+  mix-blend-mode: soft-light;
 }
 
 /* ── Header ── */
@@ -970,11 +1001,54 @@ const VIDEO_W = 1280, VIDEO_H = 720;
 const VIDEO_FPS = 30;
 const TRANS_SECS = 1.0;
 const HOLD_SECS  = 0.6;
+const FIELD_BG_SRC = 'assets/copa-2026-bg.png';
+const fieldBgImage = new Image();
+fieldBgImage.src = FIELD_BG_SRC;
 
 function easeInOut(t) { return t < .5 ? 2*t*t : -1+(4-2*t)*t; }
 
+function drawCoverImage(ctx, img, x, y, w, h) {
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+  const sw = w / scale;
+  const sh = h / scale;
+  const sx = (img.naturalWidth - sw) / 2;
+  const sy = Math.max(0, (img.naturalHeight - sh) * 0.18);
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function preloadFieldBackground() {
+  if (fieldBgImage.complete && fieldBgImage.naturalWidth) return Promise.resolve();
+  return new Promise(resolve => {
+    fieldBgImage.onload = resolve;
+    fieldBgImage.onerror = resolve;
+  });
+}
+
 // ── Fundo decorativo no canvas — tema claro ──
 function drawBackground(ctx, W, H) {
+  if (fieldBgImage.complete && fieldBgImage.naturalWidth) {
+    drawCoverImage(ctx, fieldBgImage, 0, 0, W, H);
+
+    const edgeGrad = ctx.createLinearGradient(0, 0, W, 0);
+    edgeGrad.addColorStop(0, 'rgba(239,247,238,.74)');
+    edgeGrad.addColorStop(.16, 'rgba(239,247,238,.36)');
+    edgeGrad.addColorStop(.84, 'rgba(239,247,238,.34)');
+    edgeGrad.addColorStop(1, 'rgba(239,247,238,.78)');
+    ctx.fillStyle = edgeGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    const softGrad = ctx.createLinearGradient(0, 0, 0, H);
+    softGrad.addColorStop(0, 'rgba(239,247,238,.42)');
+    softGrad.addColorStop(.32, 'rgba(239,247,238,.66)');
+    softGrad.addColorStop(1, 'rgba(239,247,238,.72)');
+    ctx.fillStyle = softGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = 'rgba(0,48,18,.08)';
+    ctx.fillRect(0, 0, W, H);
+    return;
+  }
+
   // Base: verde-branco claro
   ctx.fillStyle = '#EFF7EE';
   ctx.fillRect(0, 0, W, H);
@@ -1259,7 +1333,7 @@ async function exportVideo() {
   btn.classList.add('recording');
   progressBar.style.display = 'block';
 
-  await preloadAvatars();
+  await Promise.all([preloadAvatars(), preloadFieldBackground()]);
 
   const canvas = document.createElement('canvas');
   canvas.width = VIDEO_W; canvas.height = VIDEO_H;
