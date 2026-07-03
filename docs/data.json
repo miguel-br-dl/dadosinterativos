@@ -4870,14 +4870,22 @@
           "name": "Thiago",
           "full_name": "Thiago",
           "position": 1,
-          "points": 351,
+          "points": 357,
           "avatar": "avatars/66526.png"
+        },
+        {
+          "user_id": "66516",
+          "name": "Lucas",
+          "full_name": "Lucas Oliveira",
+          "position": 2,
+          "points": 352,
+          "avatar": "avatars/66516.png"
         },
         {
           "user_id": "107351",
           "name": "Fausto",
           "full_name": "Fausto Novaes Chiappin Vizoni",
-          "position": 2,
+          "position": 3,
           "points": 350,
           "avatar": ""
         },
@@ -4885,24 +4893,16 @@
           "user_id": "67029",
           "name": "Ronaldo",
           "full_name": "Ronaldo Almeida",
-          "position": 3,
-          "points": 344,
-          "avatar": "avatars/67029.jpeg"
-        },
-        {
-          "user_id": "66516",
-          "name": "Lucas",
-          "full_name": "Lucas Oliveira",
           "position": 4,
-          "points": 343,
-          "avatar": "avatars/66516.png"
+          "points": 345,
+          "avatar": "avatars/67029.jpeg"
         },
         {
           "user_id": "66972",
           "name": "Miguel",
           "full_name": "Miguel Angelo De Barros Moutinho Neto",
           "position": 5,
-          "points": 340,
+          "points": 341,
           "avatar": "avatars/66972.png"
         },
         {
@@ -4910,143 +4910,143 @@
           "name": "JP",
           "full_name": "João Paulo",
           "position": 6,
-          "points": 339,
+          "points": 340,
           "avatar": "avatars/9.png"
+        },
+        {
+          "user_id": "2590",
+          "name": "Ricardo",
+          "full_name": "Ricardo Gielow Rg09",
+          "position": 7,
+          "points": 337,
+          "avatar": "avatars/2590.png"
         },
         {
           "user_id": "66979",
           "name": "Leôspa",
           "full_name": "Leonardo Toledo",
-          "position": 7,
-          "points": 333,
-          "avatar": "avatars/66979.jpg"
-        },
-        {
-          "user_id": "66520",
-          "name": "Juliano",
-          "full_name": "Juliano Toaldo",
           "position": 8,
-          "points": 331,
-          "avatar": ""
+          "points": 334,
+          "avatar": "avatars/66979.jpg"
         },
         {
           "user_id": "66982",
           "name": "Jean",
           "full_name": "Jean Raphael",
           "position": 9,
-          "points": 330,
+          "points": 331,
           "avatar": "avatars/66982.jpg"
+        },
+        {
+          "user_id": "66520",
+          "name": "Juliano",
+          "full_name": "Juliano Toaldo",
+          "position": 10,
+          "points": 331,
+          "avatar": ""
         },
         {
           "user_id": "107966",
           "name": "Rodrigo",
           "full_name": "Rodrigo Cordeiro Dos Santos",
-          "position": 10,
-          "points": 329,
+          "position": 11,
+          "points": 330,
           "avatar": ""
         },
         {
           "user_id": "67401",
           "name": "El Pistolero",
           "full_name": "Luiz Cezar De Lara",
-          "position": 11,
-          "points": 329,
-          "avatar": "avatars/67401.jpeg"
-        },
-        {
-          "user_id": "2590",
-          "name": "Ricardo",
-          "full_name": "Ricardo Gielow Rg09",
           "position": 12,
-          "points": 328,
-          "avatar": "avatars/2590.png"
+          "points": 330,
+          "avatar": "avatars/67401.jpeg"
         },
         {
           "user_id": "67620",
           "name": "Henry",
           "full_name": "Henry Tanaka Baggio",
           "position": 13,
-          "points": 327,
+          "points": 328,
           "avatar": "avatars/67620.png"
-        },
-        {
-          "user_id": "105937",
-          "name": "Fabão",
-          "full_name": "Fabio Bruch",
-          "position": 14,
-          "points": 317,
-          "avatar": "avatars/105937.jpg"
         },
         {
           "user_id": "107136",
           "name": "Daniel",
           "full_name": "Daniel Ferreira",
-          "position": 15,
-          "points": 314,
+          "position": 14,
+          "points": 323,
           "avatar": "avatars/107136.png"
+        },
+        {
+          "user_id": "105937",
+          "name": "Fabão",
+          "full_name": "Fabio Bruch",
+          "position": 15,
+          "points": 318,
+          "avatar": "avatars/105937.jpg"
         },
         {
           "user_id": "89731",
           "name": "Zilei",
           "full_name": "Zilei Carolina Da Silveira De Lara",
           "position": 16,
-          "points": 312,
+          "points": 313,
           "avatar": "avatars/89731.png"
-        },
-        {
-          "user_id": "67045",
-          "name": "Pablo",
-          "full_name": "Pablo Damasceno Rattes",
-          "position": 17,
-          "points": 309,
-          "avatar": ""
         },
         {
           "user_id": "67018",
           "name": "Nadal",
           "full_name": "Fabiano",
-          "position": 18,
-          "points": 302,
+          "position": 17,
+          "points": 311,
           "avatar": "avatars/67018.jpg"
+        },
+        {
+          "user_id": "67045",
+          "name": "Pablo",
+          "full_name": "Pablo Damasceno Rattes",
+          "position": 18,
+          "points": 310,
+          "avatar": ""
         },
         {
           "user_id": "106887",
           "name": "Maycon",
           "full_name": "Maycon Penha",
           "position": 19,
-          "points": 297,
+          "points": 298,
+          "avatar": ""
+        },
+        {
+          "user_id": "106030",
+          "name": "Maicris",
+          "full_name": "Maicris Fernandes",
+          "position": 20,
+          "points": 291,
           "avatar": ""
         },
         {
           "user_id": "106417",
           "name": "Sandro",
           "full_name": "Sandro Brondani",
-          "position": 20,
-          "points": 288,
+          "position": 21,
+          "points": 289,
           "avatar": "avatars/106417.png"
         },
         {
           "user_id": "66994",
           "name": "Danilo",
           "full_name": "Danilo",
-          "position": 21,
-          "points": 284,
-          "avatar": "avatars/66994.jpg"
-        },
-        {
-          "user_id": "106030",
-          "name": "Maicris",
-          "full_name": "Maicris Fernandes",
           "position": 22,
-          "points": 282,
-          "avatar": ""
+          "points": 285,
+          "avatar": "avatars/66994.jpg"
         },
         {
           "user_id": "107318",
           "name": "Saka",
           "full_name": "Saka",
           "position": 23,
-          "points": 278,
+          "points": 279,
           "avatar": ""
         },
         {
@@ -5062,7 +5062,7 @@
           "name": "Fernando",
           "full_name": "Fernando Prestes",
           "position": 25,
-          "points": 261,
+          "points": 270,
           "avatar": "avatars/107312.png"
         },
         {
@@ -5078,7 +5078,7 @@
           "name": "Marcio",
           "full_name": "Marcio Passos",
           "position": 27,
-          "points": 257,
+          "points": 258,
           "avatar": ""
         }
       ]
