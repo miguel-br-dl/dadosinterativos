@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Atualiza scrape do dia e reconstrói o site.
-#
+# 
 # Uso:
 #   ./atualizar.sh 28/06        # coleta dia 28/06/2026
 #   ./atualizar.sh              # usa a data de hoje automaticamente
