@@ -8,7 +8,6 @@ import json
 import shutil
 from pathlib import Path
 
-
 ROOT      = Path(__file__).parent
 SNAPSHOTS = ROOT / "data" / "snapshots"
 AVATARS   = ROOT / "data" / "avatars"
