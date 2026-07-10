@@ -6408,6 +6408,227 @@
           "avatar": "avatars/107312.png"
         }
       ]
+    },
+    {
+      "date": "2026-07-10",
+      "entries": [
+        {
+          "user_id": "66526",
+          "name": "Thiago",
+          "full_name": "Thiago",
+          "position": 1,
+          "points": 412,
+          "avatar": "avatars/66526.png"
+        },
+        {
+          "user_id": "107351",
+          "name": "Fausto",
+          "full_name": "Fausto Novaes Chiappin Vizoni",
+          "position": 2,
+          "points": 406,
+          "avatar": ""
+        },
+        {
+          "user_id": "66516",
+          "name": "Lucas",
+          "full_name": "Lucas Oliveira",
+          "position": 3,
+          "points": 397,
+          "avatar": "avatars/66516.png"
+        },
+        {
+          "user_id": "66972",
+          "name": "Miguel",
+          "full_name": "Miguel Angelo De Barros Moutinho Neto",
+          "position": 4,
+          "points": 396,
+          "avatar": "avatars/66972.png"
+        },
+        {
+          "user_id": "2590",
+          "name": "Ricardo",
+          "full_name": "Ricardo Gielow Rg09",
+          "position": 5,
+          "points": 391,
+          "avatar": "avatars/2590.png"
+        },
+        {
+          "user_id": "67029",
+          "name": "Ronaldo",
+          "full_name": "Ronaldo Almeida",
+          "position": 6,
+          "points": 385,
+          "avatar": "avatars/67029.jpeg"
+        },
+        {
+          "user_id": "9",
+          "name": "JP",
+          "full_name": "João Paulo",
+          "position": 7,
+          "points": 383,
+          "avatar": "avatars/9.png"
+        },
+        {
+          "user_id": "67620",
+          "name": "Henry",
+          "full_name": "Henry Tanaka Baggio",
+          "position": 8,
+          "points": 383,
+          "avatar": "avatars/67620.png"
+        },
+        {
+          "user_id": "66979",
+          "name": "Leôspa",
+          "full_name": "Leonardo Toledo",
+          "position": 9,
+          "points": 381,
+          "avatar": "avatars/66979.jpg"
+        },
+        {
+          "user_id": "66520",
+          "name": "Juliano",
+          "full_name": "Juliano Toaldo",
+          "position": 10,
+          "points": 379,
+          "avatar": ""
+        },
+        {
+          "user_id": "66982",
+          "name": "Jean",
+          "full_name": "Jean Raphael",
+          "position": 11,
+          "points": 378,
+          "avatar": "avatars/66982.jpg"
+        },
+        {
+          "user_id": "67401",
+          "name": "El Pistolero",
+          "full_name": "Luiz Cezar De Lara",
+          "position": 12,
+          "points": 376,
+          "avatar": "avatars/67401.jpeg"
+        },
+        {
+          "user_id": "107966",
+          "name": "Rodrigo",
+          "full_name": "Rodrigo Cordeiro Dos Santos",
+          "position": 13,
+          "points": 372,
+          "avatar": ""
+        },
+        {
+          "user_id": "105937",
+          "name": "Fabão",
+          "full_name": "Fabio Bruch",
+          "position": 14,
+          "points": 367,
+          "avatar": "avatars/105937.jpg"
+        },
+        {
+          "user_id": "107136",
+          "name": "Daniel",
+          "full_name": "Daniel Ferreira",
+          "position": 15,
+          "points": 357,
+          "avatar": "avatars/107136.png"
+        },
+        {
+          "user_id": "89731",
+          "name": "Zilei",
+          "full_name": "Zilei Carolina Da Silveira De Lara",
+          "position": 16,
+          "points": 347,
+          "avatar": "avatars/89731.png"
+        },
+        {
+          "user_id": "106887",
+          "name": "Maycon",
+          "full_name": "Maycon Penha",
+          "position": 17,
+          "points": 345,
+          "avatar": ""
+        },
+        {
+          "user_id": "67018",
+          "name": "Nadal",
+          "full_name": "Fabiano",
+          "position": 18,
+          "points": 345,
+          "avatar": "avatars/67018.jpg"
+        },
+        {
+          "user_id": "66994",
+          "name": "Danilo",
+          "full_name": "Danilo",
+          "position": 19,
+          "points": 336,
+          "avatar": "avatars/66994.jpg"
+        },
+        {
+          "user_id": "106030",
+          "name": "Maicris",
+          "full_name": "Maicris Fernandes",
+          "position": 20,
+          "points": 333,
+          "avatar": ""
+        },
+        {
+          "user_id": "106417",
+          "name": "Sandro",
+          "full_name": "Sandro Brondani",
+          "position": 21,
+          "points": 332,
+          "avatar": "avatars/106417.png"
+        },
+        {
+          "user_id": "67045",
+          "name": "Pablo",
+          "full_name": "Pablo Damasceno Rattes",
+          "position": 22,
+          "points": 330,
+          "avatar": ""
+        },
+        {
+          "user_id": "107318",
+          "name": "Saka",
+          "full_name": "Saka",
+          "position": 23,
+          "points": 317,
+          "avatar": ""
+        },
+        {
+          "user_id": "108108",
+          "name": "Marcio",
+          "full_name": "Marcio Passos",
+          "position": 24,
+          "points": 294,
+          "avatar": "avatars/108108.png"
+        },
+        {
+          "user_id": "106568",
+          "name": "Caiut",
+          "full_name": "Fabio Caiut",
+          "position": 25,
+          "points": 293,
+          "avatar": ""
+        },
+        {
+          "user_id": "66984",
+          "name": "BIRO-BIRO",
+          "full_name": "Marcos Viana Duchinski",
+          "position": 26,
+          "points": 291,
+          "avatar": "avatars/66984.png"
+        },
+        {
+          "user_id": "107312",
+          "name": "Fernando",
+          "full_name": "Fernando Prestes",
+          "position": 27,
+          "points": 287,
+          "avatar": "avatars/107312.png"
+        }
+      ]
     }
   ]
 }
